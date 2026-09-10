@@ -118,6 +118,21 @@ services:
     ports:
       - "8091:8081"
 
+  tax-webhook:
+    # Saleor Tax App for TaxJar — see backend/apps/tax_webhook_receiver/README.md.
+    image: python:3.12-slim
+    command: python3 /app/receiver.py
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - ./backend/apps/tax_webhook_receiver:/app:ro
+    env_file:
+      - .env
+      - backend/tax.env
+    ports:
+      - "8092:8082"
+
 volumes:
   saleor-db:
   saleor-cache:

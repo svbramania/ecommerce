@@ -6,6 +6,8 @@
 # backend/backend.env's SECRET_KEY=changeme, so it doesn't get committed.
 backend/fulfillment.env
 backend/payment.env
+backend/tax.env
+backend/shipping.env
 
 # Node / Next.js
 node_modules/
