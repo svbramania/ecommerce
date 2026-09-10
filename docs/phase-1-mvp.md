@@ -61,18 +61,34 @@ backlog item honestly rather than marking the phase done early.
   embeds and framing, restricts `connect-src` to this origin + the Saleor
   API).
 
+- **Payment + order completion — done, verified live end-to-end** (the
+  Phase 1 item that was blocked the longest): a custom Saleor Payment App
+  for Stripe (`backend/apps/payment_webhook_receiver/`) implements the
+  four sync transaction webhooks; `storefront/src/components/PaymentForm.tsx`
+  uses real Stripe Elements (raw card data never reaches our server —
+  pay-tokenize). Verified through the **actual browser UI**: added a
+  product to cart, filled in a real Stripe Elements card form with
+  Stripe's test card (4242 4242 4242 4242), clicked Pay, and landed on
+  `/order-confirmation` with a real order number. Confirmed server-side:
+  the resulting order has `isPaid: true` and the correct captured amount.
+  A real bug was found and fixed along the way — the storefront's
+  checkout never set a billing address (`checkoutBillingAddressUpdate`),
+  so `checkoutComplete` failed with a real "Billing address is not set"
+  error until `updateShippingAddress` was changed to default billing to
+  the same address. Full detail in
+  `backend/apps/payment_webhook_receiver/README.md`.
+
 ## Not done yet
 
-- Order lifecycle (checkout → order, needs `checkoutComplete` which needs
-  a payment gateway), single live payment method (blocked on real Stripe
-  test keys — the checkout page states this plainly rather than faking a
-  "Place order" button), a real flat-rate shipping price (currently
-  $0.00 — a business decision for the user, not something to invent),
-  automated tax, transactional email *content* customization (Saleor's
-  default templates are what's sending right now, confirmed via Mailpit),
-  SEO metadata/sitemap, product images beyond the thumbnail field, order
-  history on the account page (needs a completed order to show, which
-  needs Stripe).
+- **3D Secure follow-through**: `CHARGE_ACTION_REQUIRED` is handled
+  correctly server-side but the storefront doesn't yet drive Stripe.js's
+  confirmation step for it — only non-3DS test cards complete today.
+- A real flat-rate shipping price (currently $0.00 — a business decision
+  for the user, not something to invent), automated tax, transactional
+  email *content* customization (Saleor's default templates are what's
+  sending right now, confirmed via Mailpit), SEO metadata/sitemap, product
+  images beyond the thumbnail field, order history on the account page
+  (now unblocked — real orders exist — just not built yet).
 
 ## Note on the empty catalog
 

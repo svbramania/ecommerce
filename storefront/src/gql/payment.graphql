@@ -1,0 +1,66 @@
+mutation PaymentGatewayInitialize($checkoutId: ID!, $gatewayId: String!) {
+  paymentGatewayInitialize(id: $checkoutId, paymentGateways: [{ id: $gatewayId }]) {
+    gatewayConfigs {
+      id
+      data
+      errors {
+        field
+        message
+        code
+      }
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+
+mutation TransactionInitialize(
+  $checkoutId: ID!
+  $gatewayId: String!
+  $data: JSON!
+  $amount: PositiveDecimal!
+) {
+  transactionInitialize(
+    id: $checkoutId
+    paymentGateway: { id: $gatewayId, data: $data }
+    amount: $amount
+  ) {
+    transaction {
+      id
+      pspReference
+    }
+    transactionEvent {
+      type
+      message
+    }
+    data
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutComplete($checkoutId: ID!) {
+  checkoutComplete(id: $checkoutId) {
+    order {
+      id
+      number
+      status
+      total {
+        gross {
+          amount
+          currency
+        }
+      }
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}

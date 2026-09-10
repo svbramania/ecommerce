@@ -14,10 +14,13 @@ const SALEOR_API_ORIGIN =
 
 const checkoutCsp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  // Stripe.js and the card-entry iframe it injects — required for the
+  // real Stripe Elements integration on this page (see PaymentForm.tsx).
+  "script-src 'self' 'unsafe-inline' https://js.stripe.com",
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: ${SALEOR_API_ORIGIN}`,
-  `connect-src 'self' ${SALEOR_API_ORIGIN}`,
+  `connect-src 'self' ${SALEOR_API_ORIGIN} https://api.stripe.com`,
+  "frame-src https://js.stripe.com https://hooks.stripe.com",
   "font-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

@@ -10,6 +10,7 @@ import {
 } from "@/lib/checkout";
 import {
   CheckoutAddPromoCodeDocument,
+  CheckoutBillingAddressUpdateDocument,
   CheckoutCreateDocument,
   CheckoutDeliveryMethodUpdateDocument,
   CheckoutEmailUpdateDocument,
@@ -103,11 +104,21 @@ export async function updateShippingAddress(address: AddressInput): Promise<Acti
   const checkoutId = await getStoredCheckoutId();
   if (!checkoutId) return { ok: false, error: "No active cart." };
 
-  const result = await saleorClient
+  const shippingResult = await saleorClient
     .mutation(CheckoutShippingAddressUpdateDocument, { checkoutId, address })
     .toPromise();
-  const errorMsg = firstError(result.data?.checkoutShippingAddressUpdate?.errors);
-  if (errorMsg) return { ok: false, error: errorMsg };
+  const shippingError = firstError(shippingResult.data?.checkoutShippingAddressUpdate?.errors);
+  if (shippingError) return { ok: false, error: shippingError };
+
+  // No separate "billing address" step in this UI yet — defaulting billing
+  // to the shipping address (the common default most checkouts use) rather
+  // than leaving checkoutComplete to fail with "Billing address is not
+  // set", which is the real error this surfaced with before this existed.
+  const billingResult = await saleorClient
+    .mutation(CheckoutBillingAddressUpdateDocument, { checkoutId, address })
+    .toPromise();
+  const billingError = firstError(billingResult.data?.checkoutBillingAddressUpdate?.errors);
+  if (billingError) return { ok: false, error: billingError };
 
   revalidatePath("/checkout");
   return { ok: true };

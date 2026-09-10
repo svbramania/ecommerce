@@ -25,7 +25,8 @@ that doesn't exist yet), **n/a** (nothing built yet for it to apply to).
 |---|---|---|
 | `pay-recompute` | **done** | Structural, not something we added: the storefront never sends a price to trust — every total is Saleor's own server-computed `checkout.totalPrice`. |
 | `pay-negative` | **done, verified live** | Tested directly: `checkoutCreate` with `quantity: -5` and `quantity: 0` both rejected with `ZERO_QUANTITY` — Saleor's own validation, not custom code. |
-| `pay-webhook`, `pay-tokenize` | **blocked** | No payment gateway wired yet (needs real Stripe test keys). |
+| `pay-webhook` | **done** | Every Saleor→payment-app webhook verifies `Saleor-Signature` (HMAC, same as the fulfillment webhook) before trusting a payload — tested live with a bad signature (401). |
+| `pay-tokenize` | **done** | Raw card data never reaches our server — Stripe Elements collects it client-side and only a PaymentMethod id crosses the network to us, confirmed by design in `PaymentForm.tsx`. |
 | `sf-csp` | **fixed this pass** | See below — CSP header added to the storefront. |
 | `sf-sanitize` | **fixed this pass** | See below — the EditorJS description renderer sanitizes before rendering, built at the same time as the renderer itself rather than bolted on after. |
 | `auth-privilege`, `auth-reset` | **fixed this pass** | See below — customer accounts (register/login/reset) built against Saleor's own account mutations. |

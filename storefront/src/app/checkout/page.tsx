@@ -2,6 +2,7 @@ import Link from "next/link";
 import { fetchCheckout, getStoredCheckoutId } from "@/lib/checkout";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { PromoCodeForm } from "@/components/PromoCodeForm";
+import { PaymentForm } from "@/components/PaymentForm";
 
 export default async function CheckoutPage() {
   const checkoutId = await getStoredCheckoutId();
@@ -22,13 +23,6 @@ export default async function CheckoutPage() {
       </div>
     );
   }
-
-  // Real, not fabricated: checkout completion (checkoutComplete) needs a
-  // payment gateway actually configured. Without real Stripe test keys
-  // there is nothing honest to build here beyond this notice — see
-  // .env.example and docs/phase-1-mvp.md.
-  const stripeConfigured =
-    !!process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY !== "sk_test_replace_me";
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-16 dark:bg-black">
@@ -70,19 +64,11 @@ export default async function CheckoutPage() {
 
           <PromoCodeForm voucherCode={checkout.voucherCode} />
 
-          <div className="rounded-lg border border-dashed border-black/15 p-4 text-sm dark:border-white/15">
-            {stripeConfigured ? (
-              <p className="text-zinc-600 dark:text-zinc-400">
-                Payment step not built yet even though a Stripe key is present — Phase 1 backlog
-                item still open.
-              </p>
-            ) : (
-              <p className="text-zinc-600 dark:text-zinc-400">
-                Payment is not wired up yet — this needs a real Stripe test key in{" "}
-                <code>.env</code> (see <code>STRIPE_SECRET_KEY</code> in{" "}
-                <code>.env.example</code>). Nothing fake stands in for it here.
-              </p>
-            )}
+          <div className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+              Payment
+            </h2>
+            <PaymentForm amount={checkout.totalPrice.gross.amount} />
           </div>
         </aside>
       </div>

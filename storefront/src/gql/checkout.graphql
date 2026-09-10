@@ -147,6 +147,19 @@ mutation CheckoutShippingAddressUpdate($checkoutId: ID!, $address: AddressInput!
   }
 }
 
+mutation CheckoutBillingAddressUpdate($checkoutId: ID!, $address: AddressInput!) {
+  checkoutBillingAddressUpdate(id: $checkoutId, billingAddress: $address) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
 mutation CheckoutDeliveryMethodUpdate($checkoutId: ID!, $deliveryMethodId: ID!) {
   checkoutDeliveryMethodUpdate(id: $checkoutId, deliveryMethodId: $deliveryMethodId) {
     checkout {
