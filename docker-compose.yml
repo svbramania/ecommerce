@@ -76,6 +76,24 @@ services:
       - "8025:8025"
     restart: unless-stopped
 
+  fulfillment-webhook:
+    # Reference 3PL connector — see
+    # backend/apps/fulfillment_webhook_receiver/README.md for the contract
+    # (Saleor -> ORDER_CREATED webhook -> this -> orderFulfill/
+    # orderFulfillmentUpdateTracking back into Saleor). stdlib-only Python,
+    # no image build needed.
+    image: python:3.12-slim
+    command: python3 /app/receiver.py
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - ./backend/apps/fulfillment_webhook_receiver:/app:ro
+    env_file:
+      - backend/fulfillment.env
+    ports:
+      - "8090:8080"
+
 volumes:
   saleor-db:
   saleor-cache:

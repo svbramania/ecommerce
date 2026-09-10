@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+# Real, dynamically-generated app token — not a static placeholder like
+# backend/backend.env's SECRET_KEY=changeme, so it doesn't get committed.
+backend/fulfillment.env
 
 # Node / Next.js
 node_modules/
