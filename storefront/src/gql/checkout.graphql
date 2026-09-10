@@ -1,0 +1,161 @@
+fragment CheckoutFields on Checkout {
+  id
+  email
+  totalPrice {
+    gross {
+      amount
+      currency
+    }
+  }
+  subtotalPrice {
+    gross {
+      amount
+      currency
+    }
+  }
+  shippingPrice {
+    gross {
+      amount
+      currency
+    }
+  }
+  isShippingRequired
+  shippingAddress {
+    firstName
+    lastName
+    streetAddress1
+    city
+    postalCode
+    country {
+      code
+    }
+  }
+  shippingMethods {
+    id
+    name
+    price {
+      amount
+      currency
+    }
+  }
+  delivery {
+    __typename
+  }
+  lines {
+    id
+    quantity
+    totalPrice {
+      gross {
+        amount
+        currency
+      }
+    }
+    variant {
+      id
+      name
+      product {
+        name
+        slug
+      }
+    }
+  }
+}
+
+mutation CheckoutCreate($channel: String!, $variantId: ID!, $quantity: Int!) {
+  checkoutCreate(
+    input: { channel: $channel, lines: [{ variantId: $variantId, quantity: $quantity }] }
+  ) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutLinesAdd($checkoutId: ID!, $variantId: ID!, $quantity: Int!) {
+  checkoutLinesAdd(id: $checkoutId, lines: [{ variantId: $variantId, quantity: $quantity }]) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutLinesUpdate($checkoutId: ID!, $lineId: ID!, $quantity: Int!) {
+  checkoutLinesUpdate(id: $checkoutId, lines: [{ lineId: $lineId, quantity: $quantity }]) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutLinesDelete($checkoutId: ID!, $lineIds: [ID!]!) {
+  checkoutLinesDelete(id: $checkoutId, linesIds: $lineIds) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutEmailUpdate($checkoutId: ID!, $email: String!) {
+  checkoutEmailUpdate(id: $checkoutId, email: $email) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutShippingAddressUpdate($checkoutId: ID!, $address: AddressInput!) {
+  checkoutShippingAddressUpdate(id: $checkoutId, shippingAddress: $address) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutDeliveryMethodUpdate($checkoutId: ID!, $deliveryMethodId: ID!) {
+  checkoutDeliveryMethodUpdate(id: $checkoutId, deliveryMethodId: $deliveryMethodId) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+query CheckoutDetails($id: ID!) {
+  checkout(id: $id) {
+    ...CheckoutFields
+  }
+}

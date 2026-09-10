@@ -9,6 +9,10 @@ const config: CodegenConfig = {
   generates: {
     "src/gql/generated/": {
       preset: "client",
+      // Fragment masking is useful for large teams enforcing per-component
+      // data colocation; at this project's current size it just adds an
+      // unwrap step everywhere, so it's off — direct field access instead.
+      presetConfig: { fragmentMasking: false },
     },
   },
 };

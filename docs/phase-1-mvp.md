@@ -18,12 +18,32 @@ backlog item honestly rather than marking the phase done early.
   loading spinner or a fabricated placeholder product. Confirmed by
   building and grepping the actual rendered HTML.
 
+- **Cart & checkout flow** (`storefront/src/app/cart`, `.../checkout`,
+  `.../actions/checkout.ts`, `lib/checkout.ts`): add-to-cart, quantity
+  update/remove, email, shipping address, and delivery-method selection —
+  all real Saleor `checkout*` mutations (introspected against the live
+  schema before writing, not guessed), guest cart id tracked in an
+  httpOnly cookie. **Verified live end-to-end**: created a temporary,
+  clearly-labeled `TEST-DELETE-ME` product via the API, drove the full
+  flow through an actual browser (add to cart → cart page showing the
+  real price/total → checkout → address → a real address-validation error
+  from Saleor surfaced correctly, which is how the missing `countryArea`
+  (state/province) field on US addresses was found and added → shipping
+  method appeared and was selectable), then deleted the test product
+  afterward so the real catalog is empty again, not polluted with test
+  data.
+
 ## Not done yet
 
-- Product detail page, cart, checkout flow, single live payment method,
-  order lifecycle, customer accounts/login, flat-rate shipping price (real
-  business decision needed, not a default), automated single-jurisdiction
-  tax, transactional email content, SEO metadata/sitemap.
+- Product images/rich-text description rendering (Saleor's `description`
+  field is EditorJS JSON, not plain text — needs a small renderer, not
+  built), order lifecycle (checkout → order, needs `checkoutComplete`
+  which needs a payment gateway), single live payment method (blocked on
+  real Stripe test keys — the checkout page states this plainly rather
+  than faking a "Place order" button), customer accounts/login, a real
+  flat-rate shipping price (currently $0.00 — a business decision for the
+  user, not something to invent), automated tax, transactional email
+  content, SEO metadata/sitemap.
 
 ## Note on the empty catalog
 
