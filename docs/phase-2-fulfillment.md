@@ -25,26 +25,24 @@ so it's tracked in the most detail.
   confirmed `UNFULFILLED` status, proving the order side of the contract
   is real.
 
-## Blocked — needs your decision (not made silently)
+## Full chain verified live (2026-09-10, user-approved)
 
-Webhook delivery itself failed live with `Forbidden IP address ...
-Invalid IP address` — Saleor's own SSRF protection
-(`HTTP_IP_FILTER_ENABLED`) refuses to call webhook targets on private IP
-ranges by default, and the docker-compose internal network is one. Saleor's
-own docs describe setting this to `False` for exactly this situation
-("local apps development using docker host"), recommending `True` for
-production (where a real 3PL's endpoint is a public HTTPS URL, not a
-private IP). This wasn't changed here — the harness's own safety check
-flagged editing a security-relevant setting as needing your explicit
-sign-off rather than being done autonomously, and that's the right call
-for a security toggle even when well-documented and narrowly scoped.
+`HTTP_IP_FILTER_ENABLED=False` set in `backend/common.env` (local dev
+only — see the comment there) after explicit user approval. Re-ran the
+draft-order test with a fresh test product and confirmed, in order:
 
-**To finish verifying this phase**: set `HTTP_IP_FILTER_ENABLED=False` in
-`backend/common.env`, restart `api`/`worker`
-(`docker compose restart api worker`), then repeat the draft-order test
-above and confirm in `docker compose logs fulfillment-webhook` that it
-received the webhook and successfully called `orderFulfill` +
-`orderFulfillmentUpdateTracking`.
+1. `fulfillment-webhook` logs: `POST /webhooks/order-created HTTP/1.1" 200`
+2. `Created 1 fulfillment(s) for order ...`
+3. `Tracking number set on fulfillment ...`
+4. A fresh `order(id: ...)` query showed `status: FULFILLED`, a real
+   fulfillment with `trackingNumber: "TEST-TRACKING-0001"`, and the
+   correct line/product/quantity.
+
+The test product was deleted afterward; the test order itself is
+harmless local-only DB state (not part of the repo, never committed).
+This is the complete, real "Shopify-equivalent" 3PL contract: an order
+placed → a 3PL's system notified → fulfillment + tracking pushed back —
+proven working end-to-end, not just written.
 
 ## Not done yet
 
