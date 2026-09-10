@@ -1,0 +1,9 @@
+query ShopInfo {
+  shop {
+    name
+    description
+    defaultCountry {
+      code
+    }
+  }
+}

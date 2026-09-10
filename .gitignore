@@ -1,0 +1,31 @@
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+node_modules/
+storefront/.next/
+storefront/out/
+storefront/.turbo/
+npm-debug.log*
+
+# Python / Django (custom backend apps live in backend/apps)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Docker volumes captured locally
+infra/local-data/
+
+# Terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.backup
+infra/terraform/**/.terraform.lock.hcl
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

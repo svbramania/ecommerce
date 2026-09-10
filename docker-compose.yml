@@ -1,0 +1,82 @@
+# Local development stack. Adapted from Saleor's own reference compose
+# (github.com/saleor/saleor-platform) — same images/env-var names, trimmed
+# to what Phase 0 needs (no tracing/observability yet, see docs/phase-0-foundation.md
+# for what's deliberately deferred).
+#
+# Every service here is a standard, non-cloud-proprietary image (Postgres,
+# Redis, official Saleor images) so this same file is the starting point for
+# a later cloud move, per the portability decision in docs/architecture.md.
+
+services:
+  api:
+    image: ghcr.io/saleor/saleor:3.23
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    depends_on:
+      - db
+      - cache
+    env_file:
+      - backend/common.env
+      - backend/backend.env
+    environment:
+      - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - DASHBOARD_URL=http://localhost:9000/
+    volumes:
+      - saleor-media:/app/media
+
+  worker:
+    image: ghcr.io/saleor/saleor:3.23
+    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
+    restart: unless-stopped
+    depends_on:
+      - db
+      - cache
+      - mailpit
+    env_file:
+      - backend/common.env
+      - backend/backend.env
+    volumes:
+      - saleor-media:/app/media
+
+  dashboard:
+    image: ghcr.io/saleor/saleor-dashboard:3.23
+    ports:
+      - "9000:80"
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  db:
+    image: library/postgres:15-alpine
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=saleor
+      - POSTGRES_PASSWORD=saleor
+    volumes:
+      - saleor-db:/var/lib/postgresql/data
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - saleor-cache:/data
+
+  mailpit:
+    # Catches every outbound email locally instead of sending real mail —
+    # inbox at http://localhost:8025, so Phase 1's transactional email
+    # (order/shipping confirmation) can be tested without a real SMTP account.
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+volumes:
+  saleor-db:
+  saleor-cache:
+  saleor-media:

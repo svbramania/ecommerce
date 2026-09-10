@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  storefront:
+    name: Storefront lint + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: storefront
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: storefront/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - name: Build (using a placeholder API URL — no live Saleor instance in CI yet)
+        env:
+          NEXT_PUBLIC_SALEOR_API_URL: http://localhost:8000/graphql/
+        run: npm run build
+
+  compose-config:
+    name: Validate docker-compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f docker-compose.yml config --quiet
+
+  # backend:
+  #   Placeholder — no custom Python code exists in backend/ yet (Phase 0 runs
+  #   Saleor's official image unmodified). Add a lint/pytest job here once
+  #   Phase 2's fulfillment/supplier connector code lands in backend/apps/.
