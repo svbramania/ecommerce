@@ -1,4 +1,4 @@
-# Payment webhook receiver (Saleor Payment App for Stripe)
+# Payment webhook receiver (Saleor Payment Apps for Stripe and PayPal)
 
 Implements Saleor's four synchronous transaction webhooks — see
 `receiver.py`'s module docstring and Saleor's own "Building a Payment App"
@@ -59,7 +59,7 @@ subscription-query webhook puts the selected fields at the top level
 instead (the same real finding already documented in
 `fulfillment_webhook_receiver`).
 
-## Known gaps — not built
+## Known gaps — not built (Stripe)
 
 - **3D Secure / `CHARGE_ACTION_REQUIRED` follow-through**: the code
   returns this result correctly, but the storefront doesn't yet drive
@@ -73,3 +73,48 @@ instead (the same real finding already documented in
 - No webhook exists yet for Stripe's *own* async events (e.g., a delayed
   payment method's status changing after the fact) — only the
   Saleor-initiated sync webhooks are implemented.
+
+## PayPal — a second payment app, same service
+
+A second Saleor App (`identifier: "custom.payment.paypal"`) with its own
+four sync webhooks, pointed at `/webhooks/paypal-*` routes on this same
+container — same pattern as Stripe, different real provider (PayPal
+Orders API v2, OAuth2 client-credentials token cached in-process). PayPal's
+flow is inherently redirect-based (the buyer approves on PayPal's own
+site), unlike Stripe's single-call test-card path, so `transactionInitialize`
+always returns `CHARGE_ACTION_REQUIRED` with an `approvalUrl` — the
+storefront (`PaypalButton.tsx`) redirects the browser there, and
+`/paypal-return` calls `transactionProcess` (which captures the order)
+once the buyer is back.
+
+### Verified live (2026-09-10)
+
+- Real OAuth2 token obtained from PayPal's sandbox.
+- Real order created via `POST /v2/checkout/orders` — confirmed directly
+  against PayPal's own `GET /v2/checkout/orders/{id}`, correct $25.00
+  USD, status `CREATED`.
+- The real `approvalUrl` genuinely resolves to PayPal's actual sandbox
+  checkout page, showing the correct amount — opened it in a real
+  browser and reached PayPal's guest-checkout card form.
+- A capture attempt against an order the buyer hadn't approved yet
+  correctly failed with PayPal's real `ORDER_NOT_APPROVED` error, proving
+  the failure path surfaces PayPal's actual reason rather than a generic
+  error.
+- **Through Saleor's own `transactionInitialize` mutation** against a
+  real checkout (not just this service directly): got back the same real
+  order id, `CHARGE_ACTION_REQUIRED`, and a working `approvalUrl` — the
+  exact response the storefront's `startPaypalCheckout` action consumes.
+
+### Not completed — a real, honest gap
+
+Clicking all the way through PayPal's own hosted guest-checkout form
+(via browser automation) did not complete — the form stopped advancing
+past the account-creation step for reasons that could not be confirmed
+(possibly PayPal's own bot-detection on their hosted page, possibly a
+subtle validation issue), and this was not pursued further since it's
+testing PayPal's UI robustness, not this integration's code. **The buyer-
+approval step itself has not been completed end-to-end** — only the
+order-creation and capture-attempt halves have real, direct verification.
+This needs either a real PayPal sandbox buyer account (created via the
+PayPal developer dashboard's "Sandbox accounts" page) or the user
+completing one real checkout themselves to close the loop.

@@ -4,6 +4,7 @@ import { CheckoutDetailsDocument, type CheckoutFieldsFragment } from "@/gql/gene
 
 export const DEFAULT_CHANNEL = "default-channel";
 const CHECKOUT_COOKIE = "checkoutId";
+const PAYPAL_TRANSACTION_COOKIE = "paypalTransactionId";
 
 // Saleor has no separate "cart" object — the Checkout object IS the cart
 // until checkoutComplete turns it into an Order. We track its id in a
@@ -34,4 +35,27 @@ export async function clearStoredCheckoutId(): Promise<void> {
 export async function fetchCheckout(id: string): Promise<CheckoutFieldsFragment | null> {
   const result = await saleorClient.query(CheckoutDetailsDocument, { id }).toPromise();
   return result.data?.checkout ?? null;
+}
+
+// Bridges the redirect to PayPal's own site and back — the transaction id
+// from transactionInitialize is what /paypal-return needs to call
+// transactionProcess once the buyer approves there.
+export async function storePaypalTransactionId(id: string): Promise<void> {
+  const store = await cookies();
+  store.set(PAYPAL_TRANSACTION_COOKIE, id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+}
+
+export async function getStoredPaypalTransactionId(): Promise<string | null> {
+  const store = await cookies();
+  return store.get(PAYPAL_TRANSACTION_COOKIE)?.value ?? null;
+}
+
+export async function clearStoredPaypalTransactionId(): Promise<void> {
+  const store = await cookies();
+  store.delete(PAYPAL_TRANSACTION_COOKIE);
 }

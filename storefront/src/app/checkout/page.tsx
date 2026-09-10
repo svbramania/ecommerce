@@ -3,6 +3,7 @@ import { fetchCheckout, getStoredCheckoutId } from "@/lib/checkout";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { PromoCodeForm } from "@/components/PromoCodeForm";
 import { PaymentForm } from "@/components/PaymentForm";
+import { PaypalButton } from "@/components/PaypalButton";
 
 export default async function CheckoutPage() {
   const checkoutId = await getStoredCheckoutId();
@@ -69,6 +70,8 @@ export default async function CheckoutPage() {
               Payment
             </h2>
             <PaymentForm amount={checkout.totalPrice.gross.amount} />
+            <div className="my-2 text-center text-xs text-zinc-500">or</div>
+            <PaypalButton amount={checkout.totalPrice.gross.amount} />
           </div>
         </aside>
       </div>

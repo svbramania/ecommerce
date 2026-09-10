@@ -1,0 +1,58 @@
+mutation PaypalGatewayInitialize($checkoutId: ID!) {
+  paymentGatewayInitialize(id: $checkoutId, paymentGateways: [{ id: "custom.payment.paypal" }]) {
+    gatewayConfigs {
+      id
+      data
+      errors {
+        field
+        message
+        code
+      }
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+
+mutation PaypalTransactionInitialize($checkoutId: ID!, $amount: PositiveDecimal!) {
+  transactionInitialize(
+    id: $checkoutId
+    paymentGateway: { id: "custom.payment.paypal" }
+    amount: $amount
+  ) {
+    transaction {
+      id
+      pspReference
+    }
+    transactionEvent {
+      type
+      message
+    }
+    data
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation PaypalTransactionProcess($transactionId: ID!) {
+  transactionProcess(id: $transactionId) {
+    transaction {
+      id
+      pspReference
+    }
+    transactionEvent {
+      type
+      message
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
