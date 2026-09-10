@@ -1,9 +1,29 @@
 # Phase 3 — Scale payments, tax, shipping
 
-Status as of 2026-09-09: **not started**. Every item in this phase
-requires a real third-party account this project doesn't have — nothing
-here can be honestly built without either those credentials or fabricating
-behavior, and this project's whole approach has been to do neither.
+Status as of 2026-09-10: **multi-currency done and verified live**; every
+other item still needs a real third-party account this project doesn't
+have — nothing here can be honestly built without either those
+credentials or fabricating behavior, and this project's whole approach
+has been to do neither.
+
+## Multi-currency — done, verified live
+
+Saleor's channel model natively supports this — no third-party account
+needed, just configuration. Created a second channel, `eu-channel` (EUR,
+default country DE), as a real reference example — not a claim that
+Germany/EUR is this business's actual target market, that's still a real
+decision for the user. Verified live: the same product/variant, listed in
+both channels with different prices ($12.50 in `default-channel`, €11.00
+in `eu-channel`), correctly returned each channel's own price and
+currency when queried anonymously — exactly what a real multi-currency
+storefront needs. Test product deleted afterward; the `eu-channel` itself
+was left in place as the working reference.
+
+**Not yet built on top of this**: a storefront channel-switcher (the
+Next.js app currently hardcodes `DEFAULT_CHANNEL = "default-channel"` in
+`lib/checkout.ts`) and a real EU-covering shipping zone (the existing
+"Default" zone only covers US) — both are real, quick follow-ups once an
+actual second market is decided on, not done speculatively here.
 
 - **Multi-carrier rate shopping** — needs a real EasyPost/Shippo-style
   account (or direct carrier accounts) to fetch real rates. Saleor's own
