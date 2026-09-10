@@ -14,9 +14,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "query ProductList($first: Int!, $channel: String!) {\n  products(first: $first, channel: $channel) {\n    totalCount\n    edges {\n      node {\n        id\n        name\n        slug\n        thumbnail {\n          url\n          alt\n        }\n        pricing {\n          priceRange {\n            start {\n              gross {\n                amount\n                currency\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}": typeof types.ProductListDocument,
     "query ShopInfo {\n  shop {\n    name\n    description\n    defaultCountry {\n      code\n    }\n  }\n}": typeof types.ShopInfoDocument,
 };
 const documents: Documents = {
+    "query ProductList($first: Int!, $channel: String!) {\n  products(first: $first, channel: $channel) {\n    totalCount\n    edges {\n      node {\n        id\n        name\n        slug\n        thumbnail {\n          url\n          alt\n        }\n        pricing {\n          priceRange {\n            start {\n              gross {\n                amount\n                currency\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}": types.ProductListDocument,
     "query ShopInfo {\n  shop {\n    name\n    description\n    defaultCountry {\n      code\n    }\n  }\n}": types.ShopInfoDocument,
 };
 
@@ -34,6 +36,10 @@ const documents: Documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query ProductList($first: Int!, $channel: String!) {\n  products(first: $first, channel: $channel) {\n    totalCount\n    edges {\n      node {\n        id\n        name\n        slug\n        thumbnail {\n          url\n          alt\n        }\n        pricing {\n          priceRange {\n            start {\n              gross {\n                amount\n                currency\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"): (typeof documents)["query ProductList($first: Int!, $channel: String!) {\n  products(first: $first, channel: $channel) {\n    totalCount\n    edges {\n      node {\n        id\n        name\n        slug\n        thumbnail {\n          url\n          alt\n        }\n        pricing {\n          priceRange {\n            start {\n              gross {\n                amount\n                currency\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
