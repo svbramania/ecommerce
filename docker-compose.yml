@@ -133,6 +133,22 @@ services:
     ports:
       - "8092:8082"
 
+  shipping-webhook:
+    # Saleor Shipping App for EasyPost — see
+    # backend/apps/shipping_webhook_receiver/README.md.
+    image: python:3.12-slim
+    command: python3 /app/receiver.py
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - ./backend/apps/shipping_webhook_receiver:/app:ro
+    env_file:
+      - .env
+      - backend/shipping.env
+    ports:
+      - "8093:8083"
+
 volumes:
   saleor-db:
   saleor-cache:
