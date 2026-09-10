@@ -44,11 +44,24 @@ This is the complete, real "Shopify-equivalent" 3PL contract: an order
 placed → a 3PL's system notified → fulfillment + tracking pushed back —
 proven working end-to-end, not just written.
 
+## Supplier catalog ingestion — done, verified live
+
+`backend/apps/supplier_catalog_ingestion/` — a CSV (sku, name, price,
+quantity) upsert tool. Verified live: rejects a malformed CSV (missing
+column, non-numeric price, a binary file renamed to `.csv`), a real
+dry-run correctly identified new SKUs, a real run created two real
+products (catching and fixing a real bug — missing `visibleInListings` —
+along the way), and re-running with changed values correctly updated
+them in place instead of duplicating. Full detail in that directory's own
+README. What's *not* built: the actual delivery mechanism for a real
+supplier's feed (SFTP/API) — no real supplier exists yet to design that
+against; this tool is the reusable Saleor-side upsert logic regardless of
+how the file arrives.
+
 ## Not done yet
 
-- Supplier catalog ingestion (CSV/SFTP/API sync of price + stock) — no
-  real supplier or their feed format exists to build against yet.
 - A second, real 3PL connector (this reference implementation stands in
   for "any 3PL following the contract," but no actual 3PL account/API
   exists to integrate for real).
-- Backorder handling, bundle/kit SKUs.
+- Backorder handling, bundle/kit SKUs — real, separate design work
+  (Saleor has no native bundle concept), not started.
