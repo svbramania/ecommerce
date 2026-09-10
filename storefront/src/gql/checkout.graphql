@@ -20,6 +20,12 @@ fragment CheckoutFields on Checkout {
     }
   }
   isShippingRequired
+  discount {
+    amount
+    currency
+  }
+  discountName
+  voucherCode
   shippingAddress {
     firstName
     lastName
@@ -143,6 +149,32 @@ mutation CheckoutShippingAddressUpdate($checkoutId: ID!, $address: AddressInput!
 
 mutation CheckoutDeliveryMethodUpdate($checkoutId: ID!, $deliveryMethodId: ID!) {
   checkoutDeliveryMethodUpdate(id: $checkoutId, deliveryMethodId: $deliveryMethodId) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutAddPromoCode($checkoutId: ID!, $promoCode: String!) {
+  checkoutAddPromoCode(id: $checkoutId, promoCode: $promoCode) {
+    checkout {
+      ...CheckoutFields
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation CheckoutRemovePromoCode($checkoutId: ID!, $promoCode: String!) {
+  checkoutRemovePromoCode(id: $checkoutId, promoCode: $promoCode) {
     checkout {
       ...CheckoutFields
     }

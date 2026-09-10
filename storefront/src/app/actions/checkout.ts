@@ -9,12 +9,14 @@ import {
   storeCheckoutId,
 } from "@/lib/checkout";
 import {
+  CheckoutAddPromoCodeDocument,
   CheckoutCreateDocument,
   CheckoutDeliveryMethodUpdateDocument,
   CheckoutEmailUpdateDocument,
   CheckoutLinesAddDocument,
   CheckoutLinesDeleteDocument,
   CheckoutLinesUpdateDocument,
+  CheckoutRemovePromoCodeDocument,
   CheckoutShippingAddressUpdateDocument,
   type AddressInput,
 } from "@/gql/generated/graphql";
@@ -122,6 +124,36 @@ export async function selectDeliveryMethod(deliveryMethodId: string): Promise<Ac
   if (errorMsg) return { ok: false, error: errorMsg };
 
   revalidatePath("/checkout");
+  return { ok: true };
+}
+
+export async function addPromoCode(promoCode: string): Promise<ActionResult> {
+  const checkoutId = await getStoredCheckoutId();
+  if (!checkoutId) return { ok: false, error: "No active cart." };
+
+  const result = await saleorClient
+    .mutation(CheckoutAddPromoCodeDocument, { checkoutId, promoCode })
+    .toPromise();
+  const errorMsg = firstError(result.data?.checkoutAddPromoCode?.errors);
+  if (errorMsg) return { ok: false, error: errorMsg };
+
+  revalidatePath("/checkout");
+  revalidatePath("/cart");
+  return { ok: true };
+}
+
+export async function removePromoCode(promoCode: string): Promise<ActionResult> {
+  const checkoutId = await getStoredCheckoutId();
+  if (!checkoutId) return { ok: false, error: "No active cart." };
+
+  const result = await saleorClient
+    .mutation(CheckoutRemovePromoCodeDocument, { checkoutId, promoCode })
+    .toPromise();
+  const errorMsg = firstError(result.data?.checkoutRemovePromoCode?.errors);
+  if (errorMsg) return { ok: false, error: errorMsg };
+
+  revalidatePath("/checkout");
+  revalidatePath("/cart");
   return { ok: true };
 }
 

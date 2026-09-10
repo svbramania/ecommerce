@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchCheckout, getStoredCheckoutId } from "@/lib/checkout";
 import { CheckoutForm } from "@/components/CheckoutForm";
+import { PromoCodeForm } from "@/components/PromoCodeForm";
 
 export default async function CheckoutPage() {
   const checkoutId = await getStoredCheckoutId();
@@ -51,6 +52,14 @@ export default async function CheckoutPage() {
                 {checkout.shippingPrice.gross.amount} {checkout.shippingPrice.gross.currency}
               </span>
             </div>
+            {checkout.discount && checkout.discount.amount > 0 && (
+              <div className="flex justify-between text-sm text-green-700 dark:text-green-400">
+                <span>Discount{checkout.discountName ? ` (${checkout.discountName})` : ""}</span>
+                <span>
+                  -{checkout.discount.amount} {checkout.discount.currency}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between border-t border-black/10 pt-2 text-sm font-medium dark:border-white/10">
               <span>Total</span>
               <span>
@@ -58,6 +67,8 @@ export default async function CheckoutPage() {
               </span>
             </div>
           </div>
+
+          <PromoCodeForm voucherCode={checkout.voucherCode} />
 
           <div className="rounded-lg border border-dashed border-black/15 p-4 text-sm dark:border-white/15">
             {stripeConfigured ? (
