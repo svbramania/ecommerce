@@ -4,8 +4,10 @@ A Saleor-based ecommerce platform, built to match the supplier/3PL
 integration depth of Shopify's app ecosystem — see `docs/` for the
 architecture decisions and phased roadmap.
 
+- `docs/PROJECT_STATUS.md` — honest one-page status of all 5 phases
 - `docs/architecture.md` — stack, cloud-portability plan, known gaps
-- `docs/phase-0-foundation.md` — current build status
+- `docs/phase-0-foundation.md`, `phase-1-mvp.md`, `phase-2-fulfillment.md`,
+  `phase-3-scale.md`, `phase-4-growth.md`, `phase-5-platform.md` — per-phase detail
 
 ## Quickstart (local dev)
 
