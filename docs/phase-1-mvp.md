@@ -33,17 +33,46 @@ backlog item honestly rather than marking the phase done early.
   afterward so the real catalog is empty again, not polluted with test
   data.
 
+- **Rich-text description rendering** (`storefront/src/components/RichText.tsx`):
+  parses Saleor's EditorJS JSON and builds React elements directly (headers,
+  paragraphs, lists) — no `dangerouslySetInnerHTML` anywhere, text goes
+  through React's own escaping, unrecognized block types are dropped. Built
+  this way from the start rather than sanitizing an HTML string after the
+  fact (security-checklist item `sf-sanitize`). Verified live with a real
+  EditorJS description on a temporary test product — heading, paragraph
+  (with inline `<b>` markup correctly stripped), and both list items
+  rendered in order.
+- **Customer accounts** (`register`, `login`, `logout`, `confirm-account`,
+  `reset-password` pages + `app/actions/auth.ts`): built against Saleor's
+  own `accountRegister`/`tokenCreate`/`confirmAccount`/`requestPasswordReset`
+  mutations. Verified live, end to end, with a real (since-deleted) test
+  account: registered → got a real confirmation email in Mailpit → this
+  shop genuinely requires email confirmation before login works (a real
+  finding, not assumed) → followed the real link → confirmed → logged in →
+  account page showed the real email → logged out → `/account` correctly
+  redirected back to `/login`. Also confirmed live that
+  `requestPasswordReset` gives the same success response for a real vs.
+  nonexistent email (security-checklist item `auth-reset`, no
+  enumeration).
+- **CSP header on `/checkout` and `/cart`** (`next.config.ts`) — security
+  checklist item `sf-csp`. Verified live via response headers. Baseline
+  (not nonce-based strict) CSP, chosen so the rest of the storefront keeps
+  static optimization; still real protection (blocks arbitrary object
+  embeds and framing, restricts `connect-src` to this origin + the Saleor
+  API).
+
 ## Not done yet
 
-- Product images/rich-text description rendering (Saleor's `description`
-  field is EditorJS JSON, not plain text — needs a small renderer, not
-  built), order lifecycle (checkout → order, needs `checkoutComplete`
-  which needs a payment gateway), single live payment method (blocked on
-  real Stripe test keys — the checkout page states this plainly rather
-  than faking a "Place order" button), customer accounts/login, a real
-  flat-rate shipping price (currently $0.00 — a business decision for the
-  user, not something to invent), automated tax, transactional email
-  content, SEO metadata/sitemap.
+- Order lifecycle (checkout → order, needs `checkoutComplete` which needs
+  a payment gateway), single live payment method (blocked on real Stripe
+  test keys — the checkout page states this plainly rather than faking a
+  "Place order" button), a real flat-rate shipping price (currently
+  $0.00 — a business decision for the user, not something to invent),
+  automated tax, transactional email *content* customization (Saleor's
+  default templates are what's sending right now, confirmed via Mailpit),
+  SEO metadata/sitemap, product images beyond the thumbnail field, order
+  history on the account page (needs a completed order to show, which
+  needs Stripe).
 
 ## Note on the empty catalog
 

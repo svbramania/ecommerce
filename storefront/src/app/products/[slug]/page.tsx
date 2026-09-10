@@ -4,6 +4,7 @@ import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
 import { ProductDetailDocument } from "@/gql/generated/graphql";
 import { AddToCartForm } from "@/components/AddToCartForm";
+import { RichText } from "@/components/RichText";
 
 export default async function ProductDetailPage({
   params,
@@ -38,10 +39,7 @@ export default async function ProductDetailPage({
           <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
             {product.name}
           </h1>
-          {/* product.description is Saleor's EditorJS rich-text JSON, not
-              plain text — rendering it properly is a follow-up (a small
-              EditorJS-to-HTML renderer), not built yet. Showing raw JSON
-              here would be worse than omitting it. */}
+          <RichText json={product.description} />
           <AddToCartForm
             variants={product.variants?.filter((v): v is NonNullable<typeof v> => v != null) ?? []}
           />

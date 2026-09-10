@@ -1,0 +1,65 @@
+mutation AccountRegister(
+  $email: String!
+  $password: String!
+  $channel: String!
+  $redirectUrl: String!
+) {
+  accountRegister(
+    input: { email: $email, password: $password, channel: $channel, redirectUrl: $redirectUrl }
+  ) {
+    user {
+      id
+      email
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation AccountTokenCreate($email: String!, $password: String!) {
+  tokenCreate(email: $email, password: $password) {
+    token
+    refreshToken
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation RequestPasswordReset($email: String!, $redirectUrl: String!, $channel: String!) {
+  requestPasswordReset(email: $email, redirectUrl: $redirectUrl, channel: $channel) {
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+mutation ConfirmAccount($email: String!, $token: String!) {
+  confirmAccount(email: $email, token: $token) {
+    user {
+      id
+      email
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
+query CurrentUser {
+  me {
+    id
+    email
+    firstName
+    lastName
+  }
+}

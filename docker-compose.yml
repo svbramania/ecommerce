@@ -50,7 +50,12 @@ services:
   db:
     image: library/postgres:15-alpine
     ports:
-      - "5432:5432"
+      # Bound to loopback only — security-checklist item infra-db (see
+      # docs/security-checklist.md). Publishing on all interfaces
+      # ("5432:5432") would expose Postgres to the whole LAN, not just
+      # this machine; api/worker still reach it fine over the compose
+      # network regardless of this binding.
+      - "127.0.0.1:5432:5432"
     restart: unless-stopped
     environment:
       - POSTGRES_USER=saleor
@@ -61,7 +66,8 @@ services:
   cache:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      # Same infra-db reasoning as the db service above — loopback only.
+      - "127.0.0.1:6379:6379"
     restart: unless-stopped
     volumes:
       - saleor-cache:/data
