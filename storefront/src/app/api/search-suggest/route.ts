@@ -12,11 +12,19 @@ export async function GET(request: NextRequest) {
   if (!q) return NextResponse.json({ suggestions: [] });
 
   const result = await saleorClient
-    .query(ProductListDocument, {
-      first: 6,
-      channel: DEFAULT_CHANNEL,
-      filter: { search: q },
-    })
+    .query(
+      ProductListDocument,
+      { first: 6, channel: DEFAULT_CHANNEL, filter: { search: q } },
+      // network-only — same module-singleton urql cache bug found and
+      // fixed elsewhere in this app (see fetchCheckout's comment in
+      // lib/checkout.ts): a search that legitimately returns zero matches
+      // (e.g. queried before Saleor's async search-index task has run for
+      // a brand-new product) gets cached and served stale forever after
+      // for that exact query string otherwise. Confirmed live: a product
+      // that became searchable after a reindex still showed empty
+      // suggestions here until this fix.
+      { requestPolicy: "network-only" },
+    )
     .toPromise();
 
   const suggestions = (result.data?.products?.edges ?? []).map((e) => ({

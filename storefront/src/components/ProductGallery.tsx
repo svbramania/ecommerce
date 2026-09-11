@@ -38,19 +38,21 @@ export function ProductGallery({
         className="aspect-square w-full rounded-lg object-cover"
       />
       {images.length > 1 && (
-        <div className="flex gap-2">
+        <div role="group" aria-label={`${productName} images`} className="flex gap-2">
           {images.map((img, i) => (
             <button
               key={img.id}
               type="button"
               onClick={() => setActiveIndex(i)}
+              aria-label={`Show image ${i + 1} of ${images.length}`}
+              aria-current={i === activeIndex}
               className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border ${
                 i === activeIndex ? "border-accent" : "border-border"
               }`}
             >
               <Image
                 src={img.url}
-                alt={img.alt || productName}
+                alt=""
                 width={64}
                 height={64}
                 className="h-full w-full object-cover"

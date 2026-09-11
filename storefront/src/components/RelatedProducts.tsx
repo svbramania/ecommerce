@@ -14,12 +14,15 @@ export async function RelatedProducts({
   categoryId: string;
   excludeProductId: string;
 }) {
+  // network-only — same module-singleton urql cache staleness bug found
+  // and fixed repeatedly elsewhere in this app (see fetchCheckout's
+  // comment in lib/checkout.ts).
   const result = await saleorClient
-    .query(ProductListDocument, {
-      first: 9,
-      channel: DEFAULT_CHANNEL,
-      filter: { categories: [categoryId] },
-    })
+    .query(
+      ProductListDocument,
+      { first: 9, channel: DEFAULT_CHANNEL, filter: { categories: [categoryId] } },
+      { requestPolicy: "network-only" },
+    )
     .toPromise();
 
   const related = (result.data?.products?.edges.map((e) => e.node) ?? [])

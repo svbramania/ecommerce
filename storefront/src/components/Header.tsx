@@ -39,7 +39,7 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-30">
       <div className="bg-header-bg">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4">
           <Link href="/" className="shrink-0 text-lg font-bold text-header-fg">
             {shop?.name ?? "Store"}
           </Link>
@@ -51,7 +51,7 @@ export async function Header() {
             className="flex shrink-0 items-center gap-1 text-sm text-header-fg hover:underline"
           >
             <User size={18} />
-            {customerToken ? "Account" : "Sign in"}
+            <span className="hidden sm:inline">{customerToken ? "Account" : "Sign in"}</span>
           </Link>
 
           <Link
@@ -66,7 +66,7 @@ export async function Header() {
                 </span>
               )}
             </span>
-            Cart
+            <span className="hidden sm:inline">Cart</span>
           </Link>
         </div>
 

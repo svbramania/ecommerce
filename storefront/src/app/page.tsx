@@ -5,17 +5,30 @@ import { ShopInfoDocument, ProductListDocument } from "@/gql/generated/graphql";
 import { ProductCard } from "@/components/ProductCard";
 
 export default async function Home() {
+  // network-only on both — same module-singleton urql cache staleness bug
+  // found and fixed repeatedly elsewhere in this app (see fetchCheckout's
+  // comment in lib/checkout.ts): without it, the homepage grid would keep
+  // showing whatever the catalog looked like on this query's first-ever
+  // request, not reflecting later admin edits.
   const [shopResult, gridResult, newArrivalsResult] = await Promise.all([
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
     saleorClient
-      .query(ProductListDocument, { first: 12, channel: DEFAULT_CHANNEL })
+      .query(
+        ProductListDocument,
+        { first: 12, channel: DEFAULT_CHANNEL },
+        { requestPolicy: "network-only" },
+      )
       .toPromise(),
     saleorClient
-      .query(ProductListDocument, {
-        first: 8,
-        channel: DEFAULT_CHANNEL,
-        sortBy: { field: "CREATED_AT", direction: "DESC" },
-      })
+      .query(
+        ProductListDocument,
+        {
+          first: 8,
+          channel: DEFAULT_CHANNEL,
+          sortBy: { field: "CREATED_AT", direction: "DESC" },
+        },
+        { requestPolicy: "network-only" },
+      )
       .toPromise(),
   ]);
 
