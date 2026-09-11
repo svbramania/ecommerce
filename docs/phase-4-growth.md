@@ -1,6 +1,6 @@
 # Phase 4 — Growth & retention
 
-Status as of 2026-09-09: **barely started** — one real piece done, the
+Status as of 2026-09-10: **in progress** — three real pieces done, the
 rest genuinely blocked on third-party accounts this project doesn't have.
 
 ## Done and verified
@@ -13,12 +13,24 @@ rest genuinely blocked on third-party accounts this project doesn't have.
   the code. Both the test product and the test voucher were deleted
   afterward — nothing fake left active in the running system.
 
+- **Abandoned-cart email reminders** (`backend/apps/abandoned_cart/`):
+  a one-shot script that finds real checkouts (Saleor consumes a
+  checkout on completion, so any still-queryable checkout genuinely
+  isn't an order yet) idle longer than `ABANDONED_CART_HOURS`, and
+  emails a real resume link via the existing Mailpit/SMTP
+  infrastructure. Verified live across three fresh test products —
+  found and fixed a real Saleor quirk along the way (both
+  `checkout.totalPrice` and per-line `totalPrice` can read as `0`
+  immediately after `checkoutCreate`, before Saleor's lazy price
+  calculation catches up); the fix computes the email total from each
+  line's real-time `variant.pricing` instead. Idempotency (skip an
+  already-reminded checkout) also verified live. Full detail in that
+  app's own README. Not built: a scheduler (this is a script, meant for
+  cron/Celery beat in a real deployment) and email content
+  customization beyond plain text.
+
 ## Not done, and honestly can't be "finished" without real accounts
 
-- **Abandoned-cart email/SMS flows** — needs a real email/SMS provider
-  account (the local Mailpit catcher from Phase 0 proves email *can* be
-  sent, but there's no real transactional-email or SMS provider
-  configured).
 - **Reviews & ratings** — no reviews platform (Yotpo/Judge.me-style)
   account exists to integrate.
 - **Loyalty/referral program** — no such system chosen or built; this is
