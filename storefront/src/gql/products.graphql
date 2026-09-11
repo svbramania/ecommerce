@@ -1,5 +1,10 @@
-query ProductList($first: Int!, $channel: String!) {
-  products(first: $first, channel: $channel) {
+query ProductList(
+  $first: Int!
+  $channel: String!
+  $filter: ProductFilterInput
+  $sortBy: ProductOrder
+) {
+  products(first: $first, channel: $channel, filter: $filter, sortBy: $sortBy) {
     totalCount
     edges {
       node {
@@ -20,6 +25,18 @@ query ProductList($first: Int!, $channel: String!) {
             }
           }
         }
+      }
+    }
+  }
+}
+
+query ProductCategories {
+  categories(first: 100) {
+    edges {
+      node {
+        id
+        name
+        slug
       }
     }
   }

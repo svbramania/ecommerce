@@ -87,6 +87,75 @@ export type AddressInput = {
   streetAddress2?: string | null | undefined;
 };
 
+export type AssignedAttributeReferenceInput = {
+  /** Returns objects with a reference pointing to a category identified by the given slug. */
+  categorySlugs?: ContainsFilterInput | null | undefined;
+  /** Returns objects with a reference pointing to a collection identified by the given slug. */
+  collectionSlugs?: ContainsFilterInput | null | undefined;
+  /** Returns objects with a reference pointing to a page identified by the given slug. */
+  pageSlugs?: ContainsFilterInput | null | undefined;
+  /** Returns objects with a reference pointing to a product identified by the given slug. */
+  productSlugs?: ContainsFilterInput | null | undefined;
+  /** Returns objects with a reference pointing to a product variant identified by the given sku. */
+  productVariantSkus?: ContainsFilterInput | null | undefined;
+  /** Returns objects with a reference pointing to an object identified by the given ID. */
+  referencedIds?: ContainsFilterInput | null | undefined;
+};
+
+export type AssignedAttributeValueInput = {
+  /** Filter by boolean value for attributes of boolean type. */
+  boolean?: boolean | null | undefined;
+  /** Filter by date value for attributes of date type. */
+  date?: DateRangeInput | null | undefined;
+  /** Filter by date time value for attributes of date time type. */
+  dateTime?: DateTimeRangeInput | null | undefined;
+  /** Filter by name assigned to AttributeValue. */
+  name?: StringFilterInput | null | undefined;
+  /** Filter by numeric value for attributes of numeric type. */
+  numeric?: DecimalFilterInput | null | undefined;
+  /** Filter by reference attribute value. */
+  reference?: AssignedAttributeReferenceInput | null | undefined;
+  /** Filter by slug assigned to AttributeValue. */
+  slug?: StringFilterInput | null | undefined;
+};
+
+export type AttributeInput = {
+  /**
+   * The boolean value of the attribute. Requires `slug` to be provided.
+   *
+   * DEPRECATED: this field will be removed. Use `value` instead.
+   */
+  boolean?: boolean | null | undefined;
+  /**
+   * The date range that the returned values should be in. In case of date/time attributes, the UTC midnight of the given date is used. Requires `slug` to be provided.
+   *
+   * DEPRECATED: this field will be removed. Use `value` instead.
+   */
+  date?: DateRangeInput | null | undefined;
+  /**
+   * The date/time range that the returned values should be in. Requires `slug` to be provided.
+   *
+   * DEPRECATED: this field will be removed. Use `value` instead.
+   */
+  dateTime?: DateTimeRangeInput | null | undefined;
+  /** Internal representation of an attribute name. */
+  slug?: string | null | undefined;
+  /** Filter by value of the attribute. Only one value input field is allowed. If provided more than one, the error will be raised. Cannot be combined with deprecated fields of `AttributeInput`.  */
+  value?: AssignedAttributeValueInput | null | undefined;
+  /**
+   * Slugs identifying the attributeValues associated with the Attribute. When specified, it filters the results to include only records with one of the matching values. Requires `slug` to be provided.
+   *
+   * DEPRECATED: this field will be removed. Use `value` instead.
+   */
+  values?: Array<string> | null | undefined;
+  /**
+   * The range that the returned values should be in. Requires `slug` to be provided.
+   *
+   * DEPRECATED: this field will be removed. Use `value` instead.
+   */
+  valuesRange?: IntRangeInput | null | undefined;
+};
+
 export type CheckoutErrorCode =
   | 'BILLING_ADDRESS_NOT_SET'
   | 'CHANNEL_INACTIVE'
@@ -121,6 +190,14 @@ export type CheckoutErrorCode =
   | 'UNIQUE'
   | 'VOUCHER_NOT_APPLICABLE'
   | 'ZERO_QUANTITY';
+
+/** Define the filtering options for fields that can contain multiple values. */
+export type ContainsFilterInput = {
+  /** The field contains all of the specified values. */
+  containsAll?: Array<string> | null | undefined;
+  /** The field contains at least one of the specified values. */
+  containsAny?: Array<string> | null | undefined;
+};
 
 /**
  * Represents country codes defined by the ISO 3166-1 alpha-2 standard.
@@ -631,12 +708,63 @@ export type CountryCode =
   /** Zimbabwe */
   | 'ZW';
 
+export type DateRangeInput = {
+  /** Start date. */
+  gte?: unknown;
+  /** End date. */
+  lte?: unknown;
+};
+
+export type DateTimeRangeInput = {
+  /** Start date. */
+  gte?: unknown;
+  /** End date. */
+  lte?: unknown;
+};
+
+/** Define the filtering options for decimal fields. */
+export type DecimalFilterInput = {
+  /** The value equal to. */
+  eq?: unknown;
+  /** The value included in. */
+  oneOf?: Array<unknown> | null | undefined;
+  /** The value in range. */
+  range?: DecimalRangeInput | null | undefined;
+};
+
+export type DecimalRangeInput = {
+  /** Decimal value greater than or equal to. */
+  gte?: unknown;
+  /** Decimal value less than or equal to. */
+  lte?: unknown;
+};
+
+export type IntRangeInput = {
+  /** Value greater than or equal to. */
+  gte?: number | null | undefined;
+  /** Value less than or equal to. */
+  lte?: number | null | undefined;
+};
+
+export type MetadataFilter = {
+  /** Key of a metadata item. */
+  key: string;
+  /** Value of a metadata item. */
+  value?: string | null | undefined;
+};
+
 export type MetadataInput = {
   /** Key of a metadata item. */
   key: string;
   /** Value of a metadata item. */
   value: string;
 };
+
+export type OrderDirection =
+  /** Specifies an ascending sort order. */
+  | 'ASC'
+  /** Specifies a descending sort order. */
+  | 'DESC';
 
 export type OrderStatus =
   | 'CANCELED'
@@ -653,6 +781,145 @@ export type PaymentGatewayConfigErrorCode =
   | 'GRAPHQL_ERROR'
   | 'INVALID'
   | 'NOT_FOUND';
+
+export type PriceRangeInput = {
+  /** Price greater than or equal to. */
+  gte?: number | null | undefined;
+  /** Price less than or equal to. */
+  lte?: number | null | undefined;
+};
+
+export type ProductFilterInput = {
+  attributes?: Array<AttributeInput> | null | undefined;
+  /** Filter by the date of availability for purchase. */
+  availableFrom?: unknown;
+  categories?: Array<string | number> | null | undefined;
+  /**
+   * Specifies the channel by which the data should be filtered.
+   *
+   * DEPRECATED: this field will be removed. Use root-level channel argument instead.
+   */
+  channel?: string | null | undefined;
+  collections?: Array<string | number> | null | undefined;
+  /** Filter on whether product is a gift card or not. */
+  giftCard?: boolean | null | undefined;
+  hasCategory?: boolean | null | undefined;
+  /**
+   * Filter by product with preordered variants.
+   *
+   * DEPRECATED: this field will be removed. Preorder is deprecated and will be removed. Model pre-sales with regular stock instead: create the planned quantity in a warehouse, or set `trackInventory` to false to sell without a stock limit.
+   */
+  hasPreorderedVariants?: boolean | null | undefined;
+  ids?: Array<string | number> | null | undefined;
+  /** Filter by availability for purchase. */
+  isAvailable?: boolean | null | undefined;
+  isPublished?: boolean | null | undefined;
+  /** Filter by visibility in product listings. */
+  isVisibleInListing?: boolean | null | undefined;
+  metadata?: Array<MetadataFilter> | null | undefined;
+  /** Filter by the lowest variant price after discounts. */
+  minimalPrice?: PriceRangeInput | null | undefined;
+  price?: PriceRangeInput | null | undefined;
+  productTypes?: Array<string | number> | null | undefined;
+  /** Filter by the publication date. */
+  publishedFrom?: unknown;
+  search?: string | null | undefined;
+  slugs?: Array<string> | null | undefined;
+  /** Filter by variants having specific stock status. */
+  stockAvailability?: StockAvailability | null | undefined;
+  stocks?: ProductStockFilterInput | null | undefined;
+  /** Filter by when was the most recent update. */
+  updatedAt?: DateTimeRangeInput | null | undefined;
+};
+
+export type ProductOrder = {
+  /**
+   * Sort product by the selected attribute's values.
+   * Note: this doesn't take translations into account yet.
+   */
+  attributeId?: string | number | null | undefined;
+  /**
+   * Specifies the channel in which to sort the data.
+   *
+   * DEPRECATED: this field will be removed. Use root-level channel argument instead.
+   */
+  channel?: string | null | undefined;
+  /** Specifies the direction in which to sort products. */
+  direction: OrderDirection;
+  /** Sort products by the selected field. */
+  field?: ProductOrderField | null | undefined;
+};
+
+export type ProductOrderField =
+  /**
+   * Sort products by collection. Note: This option is available only for the `Collection.products` query.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'COLLECTION'
+  /** Sort products by creation date. */
+  | 'CREATED_AT'
+  /** Sort products by update date. */
+  | 'DATE'
+  /** Sort products by update date. */
+  | 'LAST_MODIFIED'
+  /** Sort products by update date. */
+  | 'LAST_MODIFIED_AT'
+  /**
+   * Sort products by a minimal price of a product's variant.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'MINIMAL_PRICE'
+  /** Sort products by name. */
+  | 'NAME'
+  /**
+   * Sort products by price.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'PRICE'
+  /**
+   * Sort products by publication date.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'PUBLICATION_DATE'
+  /**
+   * Sort products by publication status.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'PUBLISHED'
+  /**
+   * Sort products by publication date.
+   *
+   * This option requires a channel filter to work as the values can vary between channels.
+   */
+  | 'PUBLISHED_AT'
+  /** Sort products by rank. Note: This option is available only with the `search` filter. */
+  | 'RANK'
+  /** Sort products by rating. */
+  | 'RATING'
+  /** Sort products by type. */
+  | 'TYPE';
+
+export type ProductStockFilterInput = {
+  quantity?: IntRangeInput | null | undefined;
+  warehouseIds?: Array<string | number> | null | undefined;
+};
+
+export type StockAvailability =
+  | 'IN_STOCK'
+  | 'OUT_OF_STOCK';
+
+/** Define the filtering options for string fields. */
+export type StringFilterInput = {
+  /** The value equal to. */
+  eq?: string | null | undefined;
+  /** The value included in. */
+  oneOf?: Array<string> | null | undefined;
+};
 
 /**
  * Represents possible event types.
@@ -927,10 +1194,17 @@ export type ProductDetailQuery = { product: { id: string, name: string, descript
 export type ProductListQueryVariables = Exact<{
   first: number;
   channel: string;
+  filter?: ProductFilterInput | null | undefined;
+  sortBy?: ProductOrder | null | undefined;
 }>;
 
 
 export type ProductListQuery = { products: { totalCount: number | null, edges: Array<{ node: { id: string, name: string, slug: string, thumbnail: { url: string, alt: string | null } | null, pricing: { priceRange: { start: { gross: { amount: number, currency: string } } | null } | null } | null } }> } | null };
+
+export type ProductCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProductCategoriesQuery = { categories: { edges: Array<{ node: { id: string, name: string, slug: string } }> } | null };
 
 export type ShopInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -964,5 +1238,6 @@ export const PaypalGatewayInitializeDocument = {"kind":"Document","definitions":
 export const PaypalTransactionInitializeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"PaypalTransactionInitialize"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"checkoutId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"amount"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveDecimal"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transactionInitialize"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"checkoutId"}}},{"kind":"Argument","name":{"kind":"Name","value":"paymentGateway"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"StringValue","value":"custom.payment.paypal","block":false}}]}},{"kind":"Argument","name":{"kind":"Name","value":"amount"},"value":{"kind":"Variable","name":{"kind":"Name","value":"amount"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pspReference"}}]}},{"kind":"Field","name":{"kind":"Name","value":"transactionEvent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"Field","name":{"kind":"Name","value":"data"}},{"kind":"Field","name":{"kind":"Name","value":"errors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"field"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]} as unknown as DocumentNode<PaypalTransactionInitializeMutation, PaypalTransactionInitializeMutationVariables>;
 export const PaypalTransactionProcessDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"PaypalTransactionProcess"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"transactionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transactionProcess"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"transactionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pspReference"}}]}},{"kind":"Field","name":{"kind":"Name","value":"transactionEvent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"Field","name":{"kind":"Name","value":"errors"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"field"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]} as unknown as DocumentNode<PaypalTransactionProcessMutation, PaypalTransactionProcessMutationVariables>;
 export const ProductDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProductDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"channel"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"product"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"slug"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}},{"kind":"Argument","name":{"kind":"Name","value":"channel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"channel"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"alt"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"bundleComponents"},"name":{"kind":"Name","value":"metafield"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"StringValue","value":"bundle_components","block":false}}]},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"quantityAvailable"}},{"kind":"Field","name":{"kind":"Name","value":"pricing"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"price"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gross"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<ProductDetailQuery, ProductDetailQueryVariables>;
-export const ProductListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProductList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"channel"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"channel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"channel"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"alt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pricing"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"priceRange"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"start"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gross"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}}]}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<ProductListQuery, ProductListQueryVariables>;
+export const ProductListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProductList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"channel"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sortBy"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductOrder"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"channel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"channel"}}},{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}},{"kind":"Argument","name":{"kind":"Name","value":"sortBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sortBy"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"alt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pricing"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"priceRange"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"start"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gross"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}}]}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<ProductListQuery, ProductListQueryVariables>;
+export const ProductCategoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProductCategories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"categories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ProductCategoriesQuery, ProductCategoriesQueryVariables>;
 export const ShopInfoDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ShopInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"defaultCountry"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]} as unknown as DocumentNode<ShopInfoQuery, ShopInfoQueryVariables>;

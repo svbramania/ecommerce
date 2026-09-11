@@ -1,7 +1,8 @@
 # Phase 4 — Growth & retention
 
-Status as of 2026-09-10: **in progress** — three real pieces done, the
-rest genuinely blocked on third-party accounts this project doesn't have.
+Status as of 2026-09-10: **in progress** — four real pieces done, the
+rest genuinely blocked on third-party accounts or product decisions
+this project doesn't have.
 
 ## Done and verified
 
@@ -29,6 +30,35 @@ rest genuinely blocked on third-party accounts this project doesn't have.
   cron/Celery beat in a real deployment) and email content
   customization beyond plain text.
 
+- **Product search & filtering** (`storefront/src/app/products/page.tsx`,
+  `storefront/src/gql/products.graphql`): real search text, category,
+  price range, and in-stock-only filters, plus name/price/newest
+  sorting — all against Saleor's own native `ProductFilterInput`/
+  `ProductOrder` GraphQL arguments (introspected against the live
+  schema, not guessed), rendered as a plain `<form method="GET">` so
+  filters are shareable/bookmarkable URLs with no client JS required.
+  Verified live end-to-end with three fresh test products across two
+  categories and varying price/stock — search, category, price range,
+  in-stock, and sort each independently confirmed to include/exclude
+  the right products.
+
+  Two real, non-obvious findings along the way: (1) Saleor's product
+  search is backed by a Postgres `search_vector` column populated by
+  an **async Celery task** (`set_product_search_document_values`), not
+  updated synchronously on product creation — a freshly created
+  product is genuinely unsearchable until that task runs (triggered
+  here via `python manage.py update_search_indexes`; a real deployment
+  needs this scheduled, e.g. Celery Beat, not just a worker). (2) The
+  storefront's shared urql client used a cache-first request policy by
+  default; since search results depend on this async indexing, an
+  empty result queried before indexing finished was cached
+  **indefinitely** (no TTL, module-level client reused across
+  requests) and kept being served stale even after the same product
+  became searchable — fixed by setting `requestPolicy: "network-only"`
+  on this query, since search/filter results must always reflect
+  current data. All three test products and the test category were
+  deleted afterward.
+
 ## Not done, and honestly can't be "finished" without real accounts
 
 - **Reviews & ratings** — no reviews platform (Yotpo/Judge.me-style)
@@ -36,11 +66,11 @@ rest genuinely blocked on third-party accounts this project doesn't have.
 - **Loyalty/referral program** — no such system chosen or built; this is
   a real product-design decision (points? cashback? tiers?) as much as an
   integration, not something to invent unprompted.
-- **Real search + facets + recommendations** — Saleor's own `products`
-  query supports basic filtering, but a real faceted-search/recommendation
-  experience (Algolia/Klevu-style) needs a real search provider account
-  and, more importantly, a real product catalog to index — there are zero
-  real products yet (see docs/phase-1-mvp.md).
+- **Faceted search/recommendations beyond Saleor's own filters** — a
+  real Algolia/Klevu-style experience (typo tolerance, ML
+  recommendations, synonym handling) would need a real external search
+  provider account; what Saleor's own schema natively supports (text
+  search, category/price/stock filters, sorting) is now wired in.
 - **Multi-channel push (Amazon, Google Shopping, Meta/Instagram Shop)** —
   each needs its own seller/merchant account and API credentials this
   project doesn't have.
