@@ -9,7 +9,11 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { initializePayment, chargeAndCompleteCheckout } from "@/app/actions/payment";
+import {
+  initializePayment,
+  chargeAndCompleteCheckout,
+  completeAfterAction,
+} from "@/app/actions/payment";
 
 function CardForm({ amount }: { amount: number }) {
   const stripe = useStripe();
@@ -43,9 +47,24 @@ function CardForm({ amount }: { amount: number }) {
             return;
           }
 
-          const result = await chargeAndCompleteCheckout(paymentMethod.id, amount);
+          let result = await chargeAndCompleteCheckout(paymentMethod.id, amount);
+
+          if (!result.ok && "requiresAction" in result) {
+            // 3D Secure: Stripe.js drives the challenge (a modal or
+            // redirect it manages) using the same client_secret our
+            // payment app got back from Stripe's PaymentIntent.
+            const { error: confirmError } = await stripe.confirmCardPayment(
+              result.clientSecret
+            );
+            if (confirmError) {
+              setError(confirmError.message ?? "3D Secure verification failed.");
+              return;
+            }
+            result = await completeAfterAction(result.transactionId);
+          }
+
           if (!result.ok) {
-            setError(result.error);
+            setError("error" in result ? result.error : "Additional action required again.");
             return;
           }
 
@@ -65,7 +84,8 @@ function CardForm({ amount }: { amount: number }) {
       </button>
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <p className="text-xs text-zinc-500">
-        Test mode — use card number 4242 4242 4242 4242, any future expiry, any CVC.
+        Test mode — 4242 4242 4242 4242 for an instant charge, or 4000 0027 6000 3184 to see the
+        3D Secure challenge. Any future expiry, any CVC.
       </p>
     </form>
   );

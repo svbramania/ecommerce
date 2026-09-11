@@ -173,6 +173,19 @@ mutation CheckoutDeliveryMethodUpdate($checkoutId: ID!, $deliveryMethodId: ID!) 
   }
 }
 
+mutation CheckoutCustomerAttach($checkoutId: ID!) {
+  checkoutCustomerAttach(id: $checkoutId) {
+    checkout {
+      id
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
 mutation CheckoutAddPromoCode($checkoutId: ID!, $promoCode: String!) {
   checkoutAddPromoCode(id: $checkoutId, promoCode: $promoCode) {
     checkout {

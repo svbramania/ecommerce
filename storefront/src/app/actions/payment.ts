@@ -6,6 +6,7 @@ import {
   CheckoutCompleteDocument,
   PaymentGatewayInitializeDocument,
   TransactionInitializeDocument,
+  TransactionProcessDocument,
 } from "@/gql/generated/graphql";
 
 // Must match the identifier the payment app was created with
@@ -40,7 +41,27 @@ export async function initializePayment(): Promise<PaymentInitResult> {
 
 export type ChargeResult =
   | { ok: true; orderNumber: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string }
+  // 3D Secure: Stripe needs the client to confirm the PaymentIntent
+  // itself (a modal/redirect it drives) before the charge can complete.
+  | { ok: false; requiresAction: true; clientSecret: string; transactionId: string };
+
+async function completeCheckout(checkoutId: string): Promise<ChargeResult> {
+  const completeResult = await saleorClient
+    .mutation(CheckoutCompleteDocument, { checkoutId })
+    .toPromise();
+
+  const completeErrors = completeResult.data?.checkoutComplete?.errors ?? [];
+  if (completeErrors.length) {
+    return { ok: false, error: completeErrors[0].message ?? "Order completion failed." };
+  }
+
+  const order = completeResult.data?.checkoutComplete?.order;
+  if (!order) return { ok: false, error: "No order was created." };
+
+  await clearStoredCheckoutId();
+  return { ok: true, orderNumber: order.number };
+}
 
 export async function chargeAndCompleteCheckout(
   paymentMethodId: string,
@@ -62,26 +83,46 @@ export async function chargeAndCompleteCheckout(
   if (txnErrors.length) return { ok: false, error: txnErrors[0].message ?? "Charge failed." };
 
   const eventType = txnResult.data?.transactionInitialize?.transactionEvent?.type;
+  const transactionId = txnResult.data?.transactionInitialize?.transaction?.id;
+
+  if (eventType === "CHARGE_ACTION_REQUIRED") {
+    const clientSecret = (txnResult.data?.transactionInitialize?.data as
+      | { clientSecret?: string }
+      | null)?.clientSecret;
+    if (!clientSecret || !transactionId) {
+      return { ok: false, error: "3D Secure required but no client secret was returned." };
+    }
+    return { ok: false, requiresAction: true, clientSecret, transactionId };
+  }
+
   if (eventType !== "CHARGE_SUCCESS") {
-    // CHARGE_ACTION_REQUIRED (3D Secure) isn't handled by this storefront
-    // yet — a real, documented gap (see docs/phase-1-mvp.md), not silently
-    // swallowed.
     const message = txnResult.data?.transactionInitialize?.transactionEvent?.message;
     return { ok: false, error: message || `Unexpected transaction result: ${eventType}` };
   }
 
-  const completeResult = await saleorClient
-    .mutation(CheckoutCompleteDocument, { checkoutId })
+  return completeCheckout(checkoutId);
+}
+
+// Called after the storefront has driven Stripe.js's confirmCardPayment
+// (the 3D Secure modal) client-side — this tells Saleor's payment app to
+// re-check the PaymentIntent and, if it now shows succeeded, complete the
+// order. See PaymentForm.tsx.
+export async function completeAfterAction(transactionId: string): Promise<ChargeResult> {
+  const checkoutId = await getStoredCheckoutId();
+  if (!checkoutId) return { ok: false, error: "No active cart." };
+
+  const processResult = await saleorClient
+    .mutation(TransactionProcessDocument, { transactionId })
     .toPromise();
 
-  const completeErrors = completeResult.data?.checkoutComplete?.errors ?? [];
-  if (completeErrors.length) {
-    return { ok: false, error: completeErrors[0].message ?? "Order completion failed." };
+  const processErrors = processResult.data?.transactionProcess?.errors ?? [];
+  if (processErrors.length) {
+    return { ok: false, error: processErrors[0].message ?? "Payment confirmation failed." };
+  }
+  if (processResult.data?.transactionProcess?.transactionEvent?.type !== "CHARGE_SUCCESS") {
+    const message = processResult.data?.transactionProcess?.transactionEvent?.message;
+    return { ok: false, error: message || "Payment was not completed." };
   }
 
-  const order = completeResult.data?.checkoutComplete?.order;
-  if (!order) return { ok: false, error: "No order was created." };
-
-  await clearStoredCheckoutId();
-  return { ok: true, orderNumber: order.number };
+  return completeCheckout(checkoutId);
 }

@@ -58,10 +58,35 @@ supplier's feed (SFTP/API) — no real supplier exists yet to design that
 against; this tool is the reusable Saleor-side upsert logic regardless of
 how the file arrives.
 
+## Backorder handling — done, no new code needed
+
+Turned out to already be a real, native Saleor feature: `preorder`
+settings on a variant (`globalThreshold`) let it be sold before any real
+stock exists, up to a cap. Verified live: created a variant with
+`preorder: { globalThreshold: 5 }` and zero real stock — a checkout for
+3 units succeeded (real backorder purchase), and a checkout for 10 units
+was correctly rejected ("Only 5 remaining in stock"). Saleor's own
+`quantityAvailable` field already reflects the threshold correctly, so
+none of the existing cart/checkout code needed to change.
+
+## Bundle/kit SKUs — done, verified live
+
+See `backend/apps/bundle_sync/README.md`. Saleor has no native bundle
+concept (unlike backorders), so this is real custom design: a bundle is
+an ordinary product whose metadata records its real component SKUs/
+quantities, and a sync script computes and writes the bundle's own real
+stock as `min(component_stock // quantity_needed)` across components.
+Verified live: two real component products, a bundle referencing them,
+the script correctly computed and set the bundle's stock, a checkout
+respected that limit (4 rejected, 3 succeeded), and reducing a
+component's stock and re-running correctly recalculated it. The
+storefront's product page now also displays a bundle's real component
+list when present.
+
 ## Not done yet
 
 - A second, real 3PL connector (this reference implementation stands in
   for "any 3PL following the contract," but no actual 3PL account/API
   exists to integrate for real).
-- Backorder handling, bundle/kit SKUs — real, separate design work
-  (Saleor has no native bundle concept), not started.
+- A trigger for the bundle sync script (currently run manually/one-shot;
+  a real deployment needs a schedule or a stock-change webhook hook).

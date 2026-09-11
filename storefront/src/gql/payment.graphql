@@ -44,6 +44,25 @@ mutation TransactionInitialize(
   }
 }
 
+mutation TransactionProcess($transactionId: ID!) {
+  transactionProcess(id: $transactionId) {
+    transaction {
+      id
+      pspReference
+    }
+    transactionEvent {
+      type
+      message
+    }
+    data
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+
 mutation CheckoutComplete($checkoutId: ID!) {
   checkoutComplete(id: $checkoutId) {
     order {

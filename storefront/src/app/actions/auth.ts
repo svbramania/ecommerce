@@ -1,11 +1,12 @@
 "use server";
 
 import { saleorClient } from "@/lib/saleor-client";
-import { clearCustomerToken, storeCustomerToken } from "@/lib/auth";
-import { DEFAULT_CHANNEL } from "@/lib/checkout";
+import { authedClient, clearCustomerToken, storeCustomerToken } from "@/lib/auth";
+import { DEFAULT_CHANNEL, getStoredCheckoutId } from "@/lib/checkout";
 import {
   AccountRegisterDocument,
   AccountTokenCreateDocument,
+  CheckoutCustomerAttachDocument,
   ConfirmAccountDocument,
   RequestPasswordResetDocument,
 } from "@/gql/generated/graphql";
@@ -41,6 +42,15 @@ export async function login(email: string, password: string): Promise<ActionResu
   if (!token) return { ok: false, error: "No token returned." };
 
   await storeCustomerToken(token);
+
+  // If the buyer added items to a guest cart before logging in, attach it
+  // to their account now — otherwise the resulting order would never
+  // show up in their real order history (see app/account/page.tsx).
+  const checkoutId = await getStoredCheckoutId();
+  if (checkoutId) {
+    await authedClient(token).mutation(CheckoutCustomerAttachDocument, { checkoutId }).toPromise();
+  }
+
   return { ok: true };
 }
 

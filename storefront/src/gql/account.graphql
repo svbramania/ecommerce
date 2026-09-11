@@ -63,3 +63,25 @@ query CurrentUser {
     lastName
   }
 }
+
+query CurrentUserOrders {
+  me {
+    orders(first: 20) {
+      edges {
+        node {
+          id
+          number
+          created
+          status
+          isPaid
+          total {
+            gross {
+              amount
+              currency
+            }
+          }
+        }
+      }
+    }
+  }
+}

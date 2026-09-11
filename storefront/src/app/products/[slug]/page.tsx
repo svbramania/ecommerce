@@ -19,6 +19,21 @@ export default async function ProductDetailPage({
   const product = result.data?.product;
   if (!product) notFound();
 
+  // Bundles are ordinary products whose metadata records the real
+  // component SKUs/quantities they're made of — the stock number Saleor
+  // shows for this product is already the real, computed "how many
+  // complete bundles are available" figure (see
+  // backend/apps/bundle_sync/README.md). This just makes the composition
+  // visible; it isn't what enforces availability.
+  let bundleComponents: { sku: string; quantity: number }[] | null = null;
+  if (product.bundleComponents) {
+    try {
+      bundleComponents = JSON.parse(product.bundleComponents);
+    } catch {
+      bundleComponents = null;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-16 dark:bg-black">
       <div className="mx-auto grid max-w-4xl gap-10 sm:grid-cols-2">
@@ -40,6 +55,18 @@ export default async function ProductDetailPage({
             {product.name}
           </h1>
           <RichText json={product.description} />
+          {bundleComponents && bundleComponents.length > 0 && (
+            <div className="rounded-lg border border-black/10 p-3 text-sm dark:border-white/10">
+              <p className="mb-1 font-medium text-black dark:text-zinc-50">This bundle includes:</p>
+              <ul className="list-inside list-disc text-zinc-600 dark:text-zinc-400">
+                {bundleComponents.map((c) => (
+                  <li key={c.sku}>
+                    {c.quantity} &times; {c.sku}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <AddToCartForm
             variants={product.variants?.filter((v): v is NonNullable<typeof v> => v != null) ?? []}
           />

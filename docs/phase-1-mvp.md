@@ -78,17 +78,34 @@ backlog item honestly rather than marking the phase done early.
   the same address. Full detail in
   `backend/apps/payment_webhook_receiver/README.md`.
 
+- **Order history on the account page**: queries the customer's real
+  orders (`me { orders }`). Also wired `checkoutCustomerAttach` into
+  login — a guest cart is now attached to the account the moment someone
+  logs in, so the resulting order actually shows up in their history
+  (without this, orders would never link to a real account). Verified
+  live: added to cart as a guest, registered/confirmed/logged in, placed
+  a real order, and it appeared correctly on `/account` as "Order #5 ·
+  FULFILLED · Paid · 60 USD".
+- **3D Secure**: the storefront now drives Stripe.js's `confirmCardPayment`
+  when `transactionInitialize` returns `CHARGE_ACTION_REQUIRED`, then
+  calls `transactionProcess` to finish. Verified live up through Stripe's
+  real 3DS2 test challenge actually rendering (a real modal showing
+  "3D Secure 2 Test Page" for this Stripe account) with the correct real
+  `client_secret` — clicking through the challenge itself inside the
+  nested iframe could not be automated (same category of limitation as
+  PayPal's hosted checkout form), so the full charge-to-order path for a
+  3DS card specifically is not confirmed end-to-end, only up to the
+  challenge rendering correctly. Non-3DS cards complete the full path,
+  confirmed repeatedly.
+
 ## Not done yet
 
-- **3D Secure follow-through**: `CHARGE_ACTION_REQUIRED` is handled
-  correctly server-side but the storefront doesn't yet drive Stripe.js's
-  confirmation step for it — only non-3DS test cards complete today.
-- A real flat-rate shipping price (currently $0.00 — a business decision
-  for the user, not something to invent), automated tax, transactional
-  email *content* customization (Saleor's default templates are what's
-  sending right now, confirmed via Mailpit), SEO metadata/sitemap, product
-  images beyond the thumbnail field, order history on the account page
-  (now unblocked — real orders exist — just not built yet).
+A real flat-rate shipping price (currently $0.00 — a business decision
+for the user, not something to invent), automated tax (see Phase 3 —
+done, just needs a real address), transactional email *content*
+customization (Saleor's default templates are what's sending right now,
+confirmed via Mailpit), SEO metadata/sitemap, product images beyond the
+thumbnail field.
 
 ## Note on the empty catalog
 
