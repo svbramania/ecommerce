@@ -22,6 +22,8 @@ jobs:
           cache-dependency-path: storefront/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - name: Audit dependencies for known CVEs (security-checklist be-deps)
+        run: npm audit --audit-level=high
       - name: Build (using a placeholder API URL — no live Saleor instance in CI yet)
         env:
           NEXT_PUBLIC_SALEOR_API_URL: http://localhost:8000/graphql/
@@ -35,6 +37,7 @@ jobs:
       - run: docker compose -f docker-compose.yml config --quiet
 
   # backend:
-  #   Placeholder — no custom Python code exists in backend/ yet (Phase 0 runs
-  #   Saleor's official image unmodified). Add a lint/pytest job here once
-  #   Phase 2's fulfillment/supplier connector code lands in backend/apps/.
+  #   backend/apps/* is deliberately stdlib-only Python (no third-party
+  #   packages, see each app's README) — nothing for a dependency scanner
+  #   to check yet. A lint/pytest job is a real follow-up once these
+  #   scripts grow test coverage, not a be-deps concern.

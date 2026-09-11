@@ -3,6 +3,7 @@
 import { saleorClient } from "@/lib/saleor-client";
 import { authedClient, clearCustomerToken, storeCustomerToken } from "@/lib/auth";
 import { DEFAULT_CHANNEL, getStoredCheckoutId } from "@/lib/checkout";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import {
   AccountRegisterDocument,
   AccountTokenCreateDocument,
@@ -17,6 +18,15 @@ function firstError(errors?: { message?: string | null }[] | null): string | nul
 }
 
 export async function register(email: string, password: string): Promise<ActionResult> {
+  const ip = await getClientIp();
+  // Bounds mass account creation from one source — security-checklist
+  // item api-rate-limit. Deliberately generous (not a login-attempt
+  // limit): a shared office/NAT IP can register several real accounts.
+  const limit = await rateLimit(`ratelimit:register:${ip}`, 5, 60 * 60);
+  if (!limit.allowed) {
+    return { ok: false, error: "Too many signups from this location. Please try again later." };
+  }
+
   const redirectUrl =
     (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000") + "/confirm-account";
   const result = await saleorClient
@@ -32,6 +42,21 @@ export async function register(email: string, password: string): Promise<ActionR
 }
 
 export async function login(email: string, password: string): Promise<ActionResult> {
+  const ip = await getClientIp();
+  // Two independent buckets — security-checklist item api-rate-limit:
+  // per-IP guards against one attacker trying many accounts; per-email
+  // guards one account against credential stuffing spread across many
+  // IPs/botnet nodes. Either limit tripping blocks the attempt.
+  const ipLimit = await rateLimit(`ratelimit:login:ip:${ip}`, 10, 5 * 60);
+  const emailLimit = await rateLimit(
+    `ratelimit:login:email:${email.toLowerCase()}`,
+    5,
+    15 * 60,
+  );
+  if (!ipLimit.allowed || !emailLimit.allowed) {
+    return { ok: false, error: "Too many login attempts. Please try again later." };
+  }
+
   const result = await saleorClient
     .mutation(AccountTokenCreateDocument, { email, password })
     .toPromise();

@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # storefront's real third-party deps (npm) — security-checklist item
+  # be-deps. backend/apps/* are deliberately stdlib-only Python (see each
+  # app's README), so there's no Python dependency manifest to scan yet.
+  - package-ecosystem: "npm"
+    directory: "/storefront"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { saleorClient } from "@/lib/saleor-client";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   DEFAULT_CHANNEL,
   clearStoredCheckoutId,
@@ -141,6 +142,15 @@ export async function selectDeliveryMethod(deliveryMethodId: string): Promise<Ac
 export async function addPromoCode(promoCode: string): Promise<ActionResult> {
   const checkoutId = await getStoredCheckoutId();
   if (!checkoutId) return { ok: false, error: "No active cart." };
+
+  // Keyed by checkoutId, not IP — security-checklist item api-rate-limit:
+  // this bounds guessing/brute-forcing valid voucher codes against one
+  // specific cart, regardless of how many source IPs an attacker rotates
+  // through.
+  const limit = await rateLimit(`ratelimit:promocode:${checkoutId}`, 10, 10 * 60);
+  if (!limit.allowed) {
+    return { ok: false, error: "Too many code attempts. Please try again later." };
+  }
 
   const result = await saleorClient
     .mutation(CheckoutAddPromoCodeDocument, { checkoutId, promoCode })

@@ -2,6 +2,7 @@
 
 import { saleorClient } from "@/lib/saleor-client";
 import { getStoredCheckoutId, clearStoredCheckoutId } from "@/lib/checkout";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   CheckoutCompleteDocument,
   PaymentGatewayInitializeDocument,
@@ -69,6 +70,15 @@ export async function chargeAndCompleteCheckout(
 ): Promise<ChargeResult> {
   const checkoutId = await getStoredCheckoutId();
   if (!checkoutId) return { ok: false, error: "No active cart." };
+
+  // Keyed by checkoutId — security-checklist item api-rate-limit: bounds
+  // card-testing (repeatedly trying stolen card numbers against one cart)
+  // regardless of source IP. Stripe's own Radar also screens each attempt,
+  // but that's fraud-scoring, not a hard cap on attempt volume.
+  const limit = await rateLimit(`ratelimit:charge:${checkoutId}`, 5, 15 * 60);
+  if (!limit.allowed) {
+    return { ok: false, error: "Too many payment attempts on this cart. Please try again later." };
+  }
 
   const txnResult = await saleorClient
     .mutation(TransactionInitializeDocument, {
