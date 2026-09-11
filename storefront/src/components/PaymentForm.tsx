@@ -72,8 +72,17 @@ function CardForm({ amount }: { amount: number }) {
         });
       }}
     >
-      <div className="rounded border border-black/15 p-3 dark:border-white/15">
-        <CardElement options={{ style: { base: { fontSize: "14px" } } }} />
+      <div>
+        <span id="card-details-label" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          Card details
+        </span>
+        <div
+          role="group"
+          aria-labelledby="card-details-label"
+          className="mt-1 rounded border border-black/15 p-3 dark:border-white/15"
+        >
+          <CardElement options={{ style: { base: { fontSize: "14px" } } }} />
+        </div>
       </div>
       <button
         type="submit"
@@ -82,7 +91,11 @@ function CardForm({ amount }: { amount: number }) {
       >
         {isPending ? "Charging…" : `Pay ${amount.toFixed(2)}`}
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
       <p className="text-xs text-zinc-500">
         Test mode — 4242 4242 4242 4242 for an instant charge, or 4000 0027 6000 3184 to see the
         3D Secure challenge. Any future expiry, any CVC.
@@ -106,7 +119,11 @@ export function PaymentForm({ amount }: { amount: number }) {
   }, []);
 
   if (error) {
-    return <p className="text-sm text-red-600 dark:text-red-400">Payment unavailable: {error}</p>;
+    return (
+      <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        Payment unavailable: {error}
+      </p>
+    );
   }
 
   if (!stripePromise) {

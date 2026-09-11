@@ -33,23 +33,38 @@ export function AuthForm({
         });
       }}
     >
-      <input
-        type="email"
-        required
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
-      />
-      <input
-        type="password"
-        required
-        minLength={8}
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
-      />
+      <div className="flex flex-col gap-1">
+        <label htmlFor="auth-email" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          Email
+        </label>
+        <input
+          id="auth-email"
+          type="email"
+          required
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor="auth-password"
+          className="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+        >
+          Password
+        </label>
+        <input
+          id="auth-password"
+          type="password"
+          required
+          minLength={8}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+        />
+      </div>
       <button
         type="submit"
         disabled={isPending}
@@ -57,7 +72,11 @@ export function AuthForm({
       >
         {isPending ? "…" : mode === "login" ? "Log in" : "Create account"}
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

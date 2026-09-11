@@ -31,7 +31,11 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Contact</h2>
         <div className="flex gap-2">
+          <label htmlFor="checkout-email" className="sr-only">
+            Email
+          </label>
           <input
+            id="checkout-email"
             type="email"
             placeholder="Email"
             value={email}
@@ -65,13 +69,18 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
               ["countryArea", "State/province (required by some countries)"],
             ] as const
           ).map(([key, label]) => (
-            <input
-              key={key}
-              placeholder={label}
-              value={address[key]}
-              onChange={(e) => setAddress((a) => ({ ...a, [key]: e.target.value }))}
-              className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
-            />
+            <div key={key} className="flex flex-col gap-1">
+              <label htmlFor={`address-${key}`} className="sr-only">
+                {label}
+              </label>
+              <input
+                id={`address-${key}`}
+                placeholder={label}
+                value={address[key]}
+                onChange={(e) => setAddress((a) => ({ ...a, [key]: e.target.value }))}
+                className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+              />
+            </div>
           ))}
         </div>
         <button
@@ -121,7 +130,11 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
         </section>
       )}
 
-      {message && <p className="text-sm text-zinc-600 dark:text-zinc-400">{message}</p>}
+      {message && (
+        <p role="status" className="text-sm text-zinc-600 dark:text-zinc-400">
+          {message}
+        </p>
+      )}
     </div>
   );
 }

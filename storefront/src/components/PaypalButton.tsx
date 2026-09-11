@@ -30,7 +30,11 @@ export function PaypalButton({ amount }: { amount: number }) {
       >
         {isPending ? "Redirecting to PayPal…" : "Pay with PayPal"}
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

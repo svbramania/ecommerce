@@ -47,7 +47,11 @@ export function PromoCodeForm({
         });
       }}
     >
+      <label htmlFor="promo-code" className="sr-only">
+        Discount code
+      </label>
       <input
+        id="promo-code"
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Discount code"
@@ -60,7 +64,11 @@ export function PromoCodeForm({
       >
         Apply
       </button>
-      {message && <p className="text-xs text-zinc-500">{message}</p>}
+      {message && (
+        <p role="status" className="text-xs text-zinc-500">
+          {message}
+        </p>
+      )}
     </form>
   );
 }

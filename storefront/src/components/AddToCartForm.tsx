@@ -28,25 +28,37 @@ export function AddToCartForm({ variants }: { variants: Variant[] }) {
       }}
     >
       {variants.length > 1 && (
-        <select
-          value={variantId}
-          onChange={(e) => setVariantId(e.target.value)}
-          className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
-        >
-          {variants.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="variant" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            Variant
+          </label>
+          <select
+            id="variant"
+            value={variantId}
+            onChange={(e) => setVariantId(e.target.value)}
+            className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+          >
+            {variants.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
-      <input
-        type="number"
-        min={1}
-        value={quantity}
-        onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-        className="w-20 rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
-      />
+      <div className="flex flex-col gap-1">
+        <label htmlFor="quantity" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          Quantity
+        </label>
+        <input
+          id="quantity"
+          type="number"
+          min={1}
+          value={quantity}
+          onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+          className="w-20 rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+        />
+      </div>
       <button
         type="submit"
         disabled={isPending}
@@ -54,7 +66,11 @@ export function AddToCartForm({ variants }: { variants: Variant[] }) {
       >
         {isPending ? "Adding…" : "Add to cart"}
       </button>
-      {message && <p className="text-sm text-zinc-600 dark:text-zinc-400">{message}</p>}
+      {message && (
+        <p role="status" className="text-sm text-zinc-600 dark:text-zinc-400">
+          {message}
+        </p>
+      )}
     </form>
   );
 }

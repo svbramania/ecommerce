@@ -98,6 +98,33 @@ backlog item honestly rather than marking the phase done early.
   challenge rendering correctly. Non-3DS cards complete the full path,
   confirmed repeatedly.
 
+## Form accessibility — fixed (2026-09-10)
+
+Asked directly whether accessibility had been addressed, and checked
+rather than assumed: it hadn't, except incidentally on the products
+search page. Every other form (login/register, checkout email +
+address, promo code, add-to-cart, cart quantity/remove, Stripe/PayPal
+payment) relied on `placeholder` text alone — no `<label>` elements,
+no ARIA, anywhere in the storefront (confirmed via a real grep before
+fixing, not guessed). That fails WCAG 3.3.2 and is exactly what an
+axe-core scan flags first ("form elements must have labels").
+
+Fixed across every form component: real `<label>`/`htmlFor` pairs (or
+`sr-only` labels/implicit wrapping where a visible label would be
+redundant, e.g. checkout's single email field), `aria-label` on the
+cart's per-line quantity input and remove button (disambiguates
+multiple identical controls for screen-reader users), `role="alert"`
+on error messages and `role="status"` on save/apply confirmations so
+they're actually announced, and a labelled `role="group"` around the
+Stripe `CardElement` iframe. Verified live, not just by eye: read each
+page's real DOM in the browser and confirmed every input resolves a
+real accessible name (explicit label, implicit label wrapping, or
+aria-label) — not a placeholder-only fallback.
+
+Not done: no automated axe-core sweep wired into CI yet (this pass was
+a manual, targeted fix after a direct question, not a systematic
+audit) — a real follow-up, not silently skipped.
+
 ## Not done yet
 
 A real flat-rate shipping price (currently $0.00 — a business decision

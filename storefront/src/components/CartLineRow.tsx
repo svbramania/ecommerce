@@ -18,7 +18,11 @@ export function CartLineRow({ line }: { line: Line }) {
         <p className="text-xs text-zinc-500">{line.variant.name}</p>
       </div>
       <div className="flex items-center gap-3">
+        <label htmlFor={`qty-${line.id}`} className="sr-only">
+          Quantity for {line.variant.product.name}
+        </label>
         <input
+          id={`qty-${line.id}`}
           type="number"
           min={0}
           defaultValue={line.quantity}
@@ -42,6 +46,7 @@ export function CartLineRow({ line }: { line: Line }) {
           type="button"
           disabled={isPending}
           onClick={() => startTransition(async () => { await removeLine(line.id); })}
+          aria-label={`Remove ${line.variant.product.name} from cart`}
           className="text-xs text-red-600 underline dark:text-red-400"
         >
           Remove

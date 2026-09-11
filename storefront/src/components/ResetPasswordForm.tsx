@@ -10,7 +10,7 @@ export function ResetPasswordForm() {
 
   if (submitted) {
     return (
-      <p className="max-w-sm text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p role="status" className="max-w-sm text-center text-sm text-zinc-600 dark:text-zinc-400">
         If an account exists for that email, a reset link is on its way. (Deliberately the same
         message either way — see auth-reset in docs/security-checklist.md.)
       </p>
@@ -28,7 +28,11 @@ export function ResetPasswordForm() {
         });
       }}
     >
+      <label htmlFor="reset-email" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+        Email
+      </label>
       <input
+        id="reset-email"
         type="email"
         required
         placeholder="Email"
