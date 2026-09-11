@@ -14,12 +14,19 @@ const SALEOR_API_ORIGIN =
 
 const checkoutCsp = [
   "default-src 'self'",
-  // Stripe.js and the card-entry iframe it injects — required for the
-  // real Stripe Elements integration on this page (see PaymentForm.tsx).
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+  // Stripe.js and the card-entry iframe it injects (PaymentForm.tsx), plus
+  // GA4/HubSpot (Analytics.tsx) — allowed here too, deliberately, since the
+  // checkout funnel is exactly what analytics needs to see, not just the
+  // rest of the site. HubSpot's tracking script dynamically pulls in
+  // additional *.hubspot.com/*.hs-scripts.com/*.hs-analytics.net requests
+  // of its own at runtime — this list is the real, documented set for the
+  // core tracking script; if a real portal ID surfaces more CSP violations
+  // in the browser console, extend it then rather than guessing every
+  // subdomain up front.
+  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://js.hs-scripts.com https://js.hs-analytics.net",
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: ${SALEOR_API_ORIGIN}`,
-  `connect-src 'self' ${SALEOR_API_ORIGIN} https://api.stripe.com`,
+  `img-src 'self' data: ${SALEOR_API_ORIGIN} https://www.google-analytics.com`,
+  `connect-src 'self' ${SALEOR_API_ORIGIN} https://api.stripe.com https://www.google-analytics.com https://analytics.google.com https://*.hubspot.com https://*.hs-analytics.net`,
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "font-src 'self'",
   "object-src 'none'",
