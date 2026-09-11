@@ -41,6 +41,15 @@ const nextConfig: NextConfig = {
     // localhost:8000 in local dev. Update/extend this when a real staging
     // or prod API domain exists.
     remotePatterns: [{ protocol: "http", hostname: "localhost", port: "8000" }],
+    // Next.js 16's image optimizer refuses to fetch from a hostname that
+    // resolves to a private/loopback IP by default (real SSRF protection) —
+    // confirmed live, it silently 400s every product image otherwise.
+    // "localhost" is the genuinely correct address for Saleor in local dev
+    // (same reasoning as HTTP_IP_FILTER_ENABLED=False in
+    // backend/common.env), so this is a real, dev-only relaxation, not a
+    // production setting — a real deployment points at a real public media
+    // host instead and doesn't need this flag at all.
+    dangerouslyAllowLocalIP: true,
   },
   async headers() {
     return [

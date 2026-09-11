@@ -80,6 +80,10 @@ query CurrentUserOrders {
               currency
             }
           }
+          fulfillments {
+            status
+            trackingNumber
+          }
         }
       }
     }

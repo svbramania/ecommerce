@@ -3,10 +3,24 @@ query ProductDetail($slug: String!, $channel: String!) {
     id
     name
     description
+    rating
+    category {
+      id
+      name
+      slug
+    }
     thumbnail {
       url
       alt
     }
+    media {
+      id
+      url
+      alt
+      sortOrder
+      type
+    }
+    reviewsMetadata: metafield(key: "reviews")
     bundleComponents: metafield(key: "bundle_components")
     variants {
       id

@@ -1,3 +1,28 @@
+fragment ProductCardFields on Product {
+  id
+  name
+  slug
+  rating
+  featured: metafield(key: "featured")
+  thumbnail {
+    url
+    alt
+  }
+  pricing {
+    priceRange {
+      start {
+        gross {
+          amount
+          currency
+        }
+      }
+    }
+  }
+  variants {
+    quantityAvailable
+  }
+}
+
 query ProductList(
   $first: Int!
   $channel: String!
@@ -8,23 +33,7 @@ query ProductList(
     totalCount
     edges {
       node {
-        id
-        name
-        slug
-        thumbnail {
-          url
-          alt
-        }
-        pricing {
-          priceRange {
-            start {
-              gross {
-                amount
-                currency
-              }
-            }
-          }
-        }
+        ...ProductCardFields
       }
     }
   }
@@ -37,6 +46,18 @@ query ProductCategories {
         id
         name
         slug
+        parent {
+          id
+        }
+        children(first: 20) {
+          edges {
+            node {
+              id
+              name
+              slug
+            }
+          }
+        }
       }
     }
   }

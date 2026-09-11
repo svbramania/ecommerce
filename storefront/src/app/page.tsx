@@ -1,36 +1,86 @@
+import Link from "next/link";
 import { saleorClient } from "@/lib/saleor-client";
-import { ShopInfoDocument } from "@/gql/generated/graphql";
+import { DEFAULT_CHANNEL } from "@/lib/checkout";
+import { ShopInfoDocument, ProductListDocument } from "@/gql/generated/graphql";
+import { ProductCard } from "@/components/ProductCard";
 
 export default async function Home() {
-  // Server component, queried once at request time — proves the storefront
-  // is actually wired to Saleor's live GraphQL API, not a static mock.
-  // Phase 1 replaces this page with the real catalog/homepage.
-  const result = await saleorClient.query(ShopInfoDocument, {}).toPromise();
-  const shop = result.data?.shop;
+  const [shopResult, gridResult, newArrivalsResult] = await Promise.all([
+    saleorClient.query(ShopInfoDocument, {}).toPromise(),
+    saleorClient
+      .query(ProductListDocument, { first: 12, channel: DEFAULT_CHANNEL })
+      .toPromise(),
+    saleorClient
+      .query(ProductListDocument, {
+        first: 8,
+        channel: DEFAULT_CHANNEL,
+        sortBy: { field: "CREATED_AT", direction: "DESC" },
+      })
+      .toPromise(),
+  ]);
+
+  const shop = shopResult.data?.shop;
+  const products = gridResult.data?.products?.edges.map((e) => e.node) ?? [];
+  const newArrivals = newArrivalsResult.data?.products?.edges.map((e) => e.node) ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 font-sans dark:bg-black">
-      <main className="flex w-full max-w-xl flex-col items-center gap-4 rounded-xl border border-black/10 bg-white p-10 text-center dark:border-white/10 dark:bg-zinc-900">
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-          Storefront ↔ Saleor connection check
-        </p>
-        {shop ? (
-          <>
-            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-              {shop.name}
-            </h1>
+    <div className="bg-surface-muted">
+      <section className="bg-header-bg px-6 py-16 text-header-fg">
+        <div className="mx-auto max-w-6xl">
+          <h1 className="text-3xl font-bold">{shop?.name ?? "Store"}</h1>
+          {shop?.description && (
+            <p className="mt-2 max-w-2xl text-header-fg/80">{shop.description}</p>
+          )}
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Shop all products</h2>
+          <Link href="/products" className="text-sm text-accent hover:underline">
+            See all &rarr;
+          </Link>
+        </div>
+
+        {products.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Default country: {shop.defaultCountry?.code ?? "not set"}
+              No products yet — this is a genuinely empty catalog, not a
+              loading state. Add real products via the{" "}
+              <a
+                href="http://localhost:9000"
+                className="font-medium text-accent underline"
+              >
+                Saleor Dashboard
+              </a>{" "}
+              to see them listed here.
             </p>
-          </>
+          </div>
         ) : (
-          <p className="text-sm text-red-600 dark:text-red-400">
-            Could not reach the Saleor API at{" "}
-            {process.env.NEXT_PUBLIC_SALEOR_API_URL}. Is{" "}
-            <code>docker compose up -d</code> running?
-          </p>
+          <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {products.map((product) => (
+              <li key={product.id}>
+                <ProductCard product={product} />
+              </li>
+            ))}
+          </ul>
         )}
-      </main>
+
+        {newArrivals.length > 0 && (
+          <>
+            <h2 className="mb-6 mt-12 text-xl font-semibold text-foreground">
+              New arrivals
+            </h2>
+            <ul className="flex snap-x gap-4 overflow-x-auto pb-2">
+              {newArrivals.map((product) => (
+                <li key={product.id} className="w-44 shrink-0 snap-start">
+                  <ProductCard product={product} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </div>
   );
 }

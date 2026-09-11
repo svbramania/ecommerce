@@ -3,14 +3,16 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import { Button } from "@/components/ui/Button";
 
 export function LogoutButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       disabled={isPending}
       onClick={() =>
         startTransition(async () => {
@@ -19,9 +21,8 @@ export function LogoutButton() {
           router.refresh();
         })
       }
-      className="rounded-full border border-black/15 px-5 py-2 text-sm dark:border-white/15"
     >
       Log out
-    </button>
+    </Button>
   );
 }

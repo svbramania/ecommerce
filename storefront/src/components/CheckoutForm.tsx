@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { selectDeliveryMethod, updateEmail, updateShippingAddress } from "@/app/actions/checkout";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import type { CheckoutFieldsFragment, CountryCode } from "@/gql/generated/graphql";
 
 export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment }) {
@@ -27,29 +29,24 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 rounded-lg border border-border bg-surface p-6">
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Contact</h2>
         <div className="flex gap-2">
           <label htmlFor="checkout-email" className="sr-only">
             Email
           </label>
-          <input
+          <Input
             id="checkout-email"
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+            className="flex-1"
           />
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => run(() => updateEmail(email))}
-            className="rounded bg-black px-4 text-sm text-white dark:bg-white dark:text-black"
-          >
+          <Button type="button" variant="primary" disabled={isPending} onClick={() => run(() => updateEmail(email))}>
             Save
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -73,18 +70,18 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
               <label htmlFor={`address-${key}`} className="sr-only">
                 {label}
               </label>
-              <input
+              <Input
                 id={`address-${key}`}
                 placeholder={label}
                 value={address[key]}
                 onChange={(e) => setAddress((a) => ({ ...a, [key]: e.target.value }))}
-                className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
               />
             </div>
           ))}
         </div>
-        <button
+        <Button
           type="button"
+          variant="secondary"
           disabled={isPending}
           onClick={() =>
             run(() =>
@@ -102,10 +99,10 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
               })
             )
           }
-          className="self-start rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black"
+          className="self-start"
         >
           Save address
-        </button>
+        </Button>
       </section>
 
       {checkout.shippingMethods.length > 0 && (
@@ -119,7 +116,7 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
               type="button"
               disabled={isPending}
               onClick={() => run(() => selectDeliveryMethod(method.id))}
-              className="flex items-center justify-between rounded border border-black/15 p-3 text-left text-sm dark:border-white/15"
+              className="flex items-center justify-between rounded-md border border-border p-3 text-left text-sm text-foreground hover:border-accent"
             >
               <span>{method.name}</span>
               <span>

@@ -10,7 +10,7 @@ export default async function ConfirmAccountPage({
 
   if (!email || !token) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 px-6 dark:bg-black">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface-muted px-6">
         <p className="text-sm text-red-600 dark:text-red-400">
           Missing confirmation link parameters.
         </p>
@@ -21,13 +21,13 @@ export default async function ConfirmAccountPage({
   const result = await confirmAccount(email, token);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 px-6 text-center dark:bg-black">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface-muted px-6 text-center">
       {result.ok ? (
         <>
           <p className="text-sm text-zinc-700 dark:text-zinc-300">
             Email confirmed — you can log in now.
           </p>
-          <Link href="/login" className="rounded-full bg-black px-5 py-2 text-sm text-white dark:bg-white dark:text-black">
+          <Link href="/login" className="rounded-full bg-accent px-5 py-2 text-sm text-accent-fg hover:bg-accent-hover">
             Log in
           </Link>
         </>

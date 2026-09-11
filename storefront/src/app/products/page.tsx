@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { saleorClient } from "@/lib/saleor-client";
 import {
@@ -7,6 +6,9 @@ import {
   type ProductFilterInput,
   type ProductOrder,
 } from "@/gql/generated/graphql";
+import { ProductCard } from "@/components/ProductCard";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 const DEFAULT_CHANNEL = "default-channel";
 
@@ -80,7 +82,12 @@ export default async function ProductsPage({
         { requestPolicy: "network-only" },
       )
       .toPromise(),
-    saleorClient.query(ProductCategoriesDocument, {}).toPromise(),
+    // Same module-singleton-cache reasoning as ProductList above — an
+    // admin adding/editing categories should show up immediately, not only
+    // after this exact query+variables combination happens to be evicted.
+    saleorClient
+      .query(ProductCategoriesDocument, {}, { requestPolicy: "network-only" })
+      .toPromise(),
   ]);
 
   const products = productsResult.data?.products?.edges.map((e) => e.node) ?? [];
@@ -91,27 +98,24 @@ export default async function ProductsPage({
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-6 py-16 dark:bg-black">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="mb-8 text-2xl font-semibold text-black dark:text-zinc-50">
-          Products
-        </h1>
+    <div className="min-h-screen bg-surface-muted px-6 py-10">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="mb-6 text-2xl font-semibold text-foreground">Products</h1>
 
         <form
           method="GET"
-          className="mb-8 flex flex-wrap items-end gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10"
+          className="mb-8 flex flex-wrap items-end gap-4 rounded-lg border border-border bg-surface p-4"
         >
           <div className="flex flex-col gap-1">
             <label htmlFor="q" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Search
             </label>
-            <input
+            <Input
               id="q"
               name="q"
               type="text"
               defaultValue={params.q ?? ""}
               placeholder="Search products…"
-              className="rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm text-black dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50"
             />
           </div>
 
@@ -127,7 +131,7 @@ export default async function ProductsPage({
                 id="category"
                 name="category"
                 defaultValue={params.category ?? ""}
-                className="rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm text-black dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50"
+                className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground"
               >
                 <option value="">All categories</option>
                 {categories.map((c) => (
@@ -143,14 +147,14 @@ export default async function ProductsPage({
             <label htmlFor="minPrice" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Min price
             </label>
-            <input
+            <Input
               id="minPrice"
               name="minPrice"
               type="number"
               min="0"
               step="0.01"
               defaultValue={params.minPrice ?? ""}
-              className="w-24 rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm text-black dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50"
+              className="w-24"
             />
           </div>
 
@@ -158,14 +162,14 @@ export default async function ProductsPage({
             <label htmlFor="maxPrice" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
               Max price
             </label>
-            <input
+            <Input
               id="maxPrice"
               name="maxPrice"
               type="number"
               min="0"
               step="0.01"
               defaultValue={params.maxPrice ?? ""}
-              className="w-24 rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm text-black dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50"
+              className="w-24"
             />
           </div>
 
@@ -177,7 +181,7 @@ export default async function ProductsPage({
               id="sort"
               name="sort"
               defaultValue={params.sort ?? ""}
-              className="rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm text-black dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground"
             >
               <option value="">Relevance</option>
               {SORT_OPTIONS.map((o) => (
@@ -188,7 +192,7 @@ export default async function ProductsPage({
             </select>
           </div>
 
-          <label className="flex items-center gap-2 pb-1.5 text-sm text-black dark:text-zinc-50">
+          <label className="flex items-center gap-2 pb-1.5 text-sm text-foreground">
             <input
               type="checkbox"
               name="inStock"
@@ -199,18 +203,12 @@ export default async function ProductsPage({
             In stock only
           </label>
 
-          <button
-            type="submit"
-            className="rounded-md bg-black px-4 py-1.5 text-sm font-medium text-white dark:bg-zinc-50 dark:text-black"
-          >
+          <Button type="submit" variant="primary">
             Apply
-          </button>
+          </Button>
 
           {hasActiveFilters && (
-            <Link
-              href="/products"
-              className="pb-1.5 text-sm text-zinc-600 underline dark:text-zinc-400"
-            >
+            <Link href="/products" className="pb-1.5 text-sm text-accent underline">
               Clear filters
             </Link>
           )}
@@ -223,14 +221,11 @@ export default async function ProductsPage({
         )}
 
         {!productsResult.error && products.length === 0 && !hasActiveFilters && (
-          <div className="rounded-xl border border-dashed border-black/15 p-10 text-center dark:border-white/15">
+          <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               No products yet — this is a genuinely empty catalog, not a
               loading state. Add real products via the{" "}
-              <a
-                href="http://localhost:9000"
-                className="font-medium text-black underline dark:text-zinc-50"
-              >
+              <a href="http://localhost:9000" className="font-medium text-accent underline">
                 Saleor Dashboard
               </a>{" "}
               to see them listed here.
@@ -239,7 +234,7 @@ export default async function ProductsPage({
         )}
 
         {!productsResult.error && products.length === 0 && hasActiveFilters && (
-          <div className="rounded-xl border border-dashed border-black/15 p-10 text-center dark:border-white/15">
+          <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               No products match these filters. Try clearing one or more of
               them.
@@ -252,30 +247,10 @@ export default async function ProductsPage({
             <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
               {totalCount} product{totalCount === 1 ? "" : "s"}
             </p>
-            <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {products.map((product) => (
-                <li
-                  key={product.id}
-                  className="flex flex-col gap-2 rounded-lg border border-black/10 p-3 dark:border-white/10"
-                >
-                  {product.thumbnail?.url && (
-                    <Image
-                      src={product.thumbnail.url}
-                      alt={product.thumbnail.alt ?? product.name}
-                      width={200}
-                      height={200}
-                      className="aspect-square w-full rounded-md object-cover"
-                    />
-                  )}
-                  <span className="text-sm font-medium text-black dark:text-zinc-50">
-                    {product.name}
-                  </span>
-                  {product.pricing?.priceRange?.start?.gross && (
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                      {product.pricing.priceRange.start.gross.amount}{" "}
-                      {product.pricing.priceRange.start.gross.currency}
-                    </span>
-                  )}
+                <li key={product.id}>
+                  <ProductCard product={product} />
                 </li>
               ))}
             </ul>

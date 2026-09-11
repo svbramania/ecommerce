@@ -1,21 +1,35 @@
 "use client";
 
 import { useTransition } from "react";
+import Image from "next/image";
 import { removeLine, updateLineQuantity } from "@/app/actions/checkout";
+import { Button } from "@/components/ui/Button";
 import type { CheckoutFieldsFragment } from "@/gql/generated/graphql";
 
 type Line = CheckoutFieldsFragment["lines"][number];
 
 export function CartLineRow({ line }: { line: Line }) {
   const [isPending, startTransition] = useTransition();
+  const thumbnail = line.variant.product.thumbnail;
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10">
-      <div>
-        <p className="text-sm font-medium text-black dark:text-zinc-50">
-          {line.variant.product.name}
-        </p>
-        <p className="text-xs text-zinc-500">{line.variant.name}</p>
+    <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+      <div className="flex items-center gap-3">
+        {thumbnail?.url ? (
+          <Image
+            src={thumbnail.url}
+            alt={thumbnail.alt ?? line.variant.product.name}
+            width={64}
+            height={64}
+            className="h-16 w-16 shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <div className="h-16 w-16 shrink-0 rounded-md bg-surface-muted" />
+        )}
+        <div>
+          <p className="text-sm font-medium text-foreground">{line.variant.product.name}</p>
+          <p className="text-xs text-zinc-500">{line.variant.name}</p>
+        </div>
       </div>
       <div className="flex items-center gap-3">
         <label htmlFor={`qty-${line.id}`} className="sr-only">
@@ -37,20 +51,20 @@ export function CartLineRow({ line }: { line: Line }) {
               }
             });
           }}
-          className="w-16 rounded border border-black/15 p-1 text-sm dark:border-white/15 dark:bg-zinc-900"
+          className="w-16 rounded-md border border-border bg-surface p-1 text-sm text-foreground"
         />
-        <span className="text-sm text-zinc-600 dark:text-zinc-400">
+        <span className="text-sm font-bold text-price">
           {line.totalPrice.gross.amount} {line.totalPrice.gross.currency}
         </span>
-        <button
+        <Button
           type="button"
+          variant="danger-ghost"
           disabled={isPending}
           onClick={() => startTransition(async () => { await removeLine(line.id); })}
           aria-label={`Remove ${line.variant.product.name} from cart`}
-          className="text-xs text-red-600 underline dark:text-red-400"
         >
           Remove
-        </button>
+        </Button>
       </div>
     </div>
   );

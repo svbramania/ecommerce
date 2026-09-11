@@ -33,7 +33,16 @@ export async function clearStoredCheckoutId(): Promise<void> {
 }
 
 export async function fetchCheckout(id: string): Promise<CheckoutFieldsFragment | null> {
-  const result = await saleorClient.query(CheckoutDetailsDocument, { id }).toPromise();
+  // network-only, not urql's default cache — saleorClient is a module-level
+  // singleton reused across requests in the same server process, so the
+  // default document cache would serve a stale snapshot of this exact
+  // checkout id (wrong totals/quantities) after its first fetch, directly
+  // contradicting this function's own job (see the file-level comment
+  // above). Confirmed live as a real bug via the same pattern already
+  // found and fixed for product search/detail queries.
+  const result = await saleorClient
+    .query(CheckoutDetailsDocument, { id }, { requestPolicy: "network-only" })
+    .toPromise();
   return result.data?.checkout ?? null;
 }
 

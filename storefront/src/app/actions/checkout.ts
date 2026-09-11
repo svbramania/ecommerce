@@ -41,6 +41,12 @@ export async function addToCart(variantId: string, quantity: number): Promise<Ac
     // fall through to creating a fresh one rather than surfacing a dead-end error.
     if (!errorMsg) {
       revalidatePath("/cart");
+      // The header's cart-count badge is rendered by the root layout on
+      // every route, not just /cart — revalidating "/cart" alone leaves a
+      // stale badge on whatever page the user is actually on when they add
+      // to cart. "layout" revalidates the root layout (and everything under
+      // it) so the badge is always current regardless of route.
+      revalidatePath("/", "layout");
       return { ok: true };
     }
   }
@@ -56,6 +62,7 @@ export async function addToCart(variantId: string, quantity: number): Promise<Ac
 
   await storeCheckoutId(newId);
   revalidatePath("/cart");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -70,6 +77,7 @@ export async function updateLineQuantity(lineId: string, quantity: number): Prom
   if (errorMsg) return { ok: false, error: errorMsg };
 
   revalidatePath("/cart");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -84,6 +92,7 @@ export async function removeLine(lineId: string): Promise<ActionResult> {
   if (errorMsg) return { ok: false, error: errorMsg };
 
   revalidatePath("/cart");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 

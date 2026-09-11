@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { addPromoCode, removePromoCode } from "@/app/actions/checkout";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export function PromoCodeForm({
   voucherCode,
@@ -14,12 +16,13 @@ export function PromoCodeForm({
 
   if (voucherCode) {
     return (
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-surface p-3 text-sm text-foreground">
         <span>
           Code <span className="font-medium">{voucherCode}</span> applied
         </span>
-        <button
+        <Button
           type="button"
+          variant="danger-ghost"
           disabled={isPending}
           onClick={() =>
             startTransition(async () => {
@@ -27,10 +30,9 @@ export function PromoCodeForm({
               setMessage(result.ok ? null : `Error: ${result.error}`);
             })
           }
-          className="text-xs text-red-600 underline dark:text-red-400"
         >
           Remove
-        </button>
+        </Button>
       </div>
     );
   }
@@ -50,20 +52,16 @@ export function PromoCodeForm({
       <label htmlFor="promo-code" className="sr-only">
         Discount code
       </label>
-      <input
+      <Input
         id="promo-code"
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Discount code"
-        className="flex-1 rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+        className="flex-1"
       />
-      <button
-        type="submit"
-        disabled={isPending || !code}
-        className="rounded bg-black px-4 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
-      >
+      <Button type="submit" variant="primary" disabled={isPending || !code}>
         Apply
-      </button>
+      </Button>
       {message && (
         <p role="status" className="text-xs text-zinc-500">
           {message}

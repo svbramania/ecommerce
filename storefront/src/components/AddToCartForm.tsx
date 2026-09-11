@@ -1,18 +1,31 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { addToCart } from "@/app/actions/checkout";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 type Variant = { id: string; name: string; quantityAvailable?: number | null };
 
 export function AddToCartForm({ variants }: { variants: Variant[] }) {
+  const router = useRouter();
   const [variantId, setVariantId] = useState(variants[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   if (variants.length === 0) {
     return <p className="text-sm text-zinc-500">No purchasable variants.</p>;
+  }
+
+  function submitAddToCart() {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await addToCart(variantId, quantity);
+      setMessage(result.ok ? "Added to cart." : `Could not add to cart: ${result.error}`);
+    });
   }
 
   return (
@@ -20,11 +33,7 @@ export function AddToCartForm({ variants }: { variants: Variant[] }) {
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        setMessage(null);
-        startTransition(async () => {
-          const result = await addToCart(variantId, quantity);
-          setMessage(result.ok ? "Added to cart." : `Could not add to cart: ${result.error}`);
-        });
+        submitAddToCart();
       }}
     >
       {variants.length > 1 && (
@@ -36,7 +45,7 @@ export function AddToCartForm({ variants }: { variants: Variant[] }) {
             id="variant"
             value={variantId}
             onChange={(e) => setVariantId(e.target.value)}
-            className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+            className="rounded-md border border-border bg-surface p-2 text-sm text-foreground"
           >
             {variants.map((v) => (
               <option key={v.id} value={v.id}>
@@ -50,22 +59,38 @@ export function AddToCartForm({ variants }: { variants: Variant[] }) {
         <label htmlFor="quantity" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Quantity
         </label>
-        <input
+        <Input
           id="quantity"
           type="number"
           min={1}
           value={quantity}
           onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-          className="w-20 rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
+          className="w-20"
         />
       </div>
-      <button
-        type="submit"
+      <Button type="submit" variant="primary" disabled={isPending}>
+        {isPending && !isBuyingNow ? "Adding…" : "Add to cart"}
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
         disabled={isPending}
-        className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
+        onClick={() => {
+          setMessage(null);
+          setIsBuyingNow(true);
+          startTransition(async () => {
+            const result = await addToCart(variantId, quantity);
+            if (result.ok) {
+              router.push("/checkout");
+            } else {
+              setMessage(`Could not buy now: ${result.error}`);
+              setIsBuyingNow(false);
+            }
+          });
+        }}
       >
-        {isPending ? "Adding…" : "Add to cart"}
-      </button>
+        {isPending && isBuyingNow ? "Redirecting…" : "Buy now"}
+      </Button>
       {message && (
         <p role="status" className="text-sm text-zinc-600 dark:text-zinc-400">
           {message}

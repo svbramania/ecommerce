@@ -1,7 +1,45 @@
 # Phase 1 — MVP: a working store
 
-Status as of 2026-09-09: **in progress**, not complete. Tracking each
+Status as of 2026-09-10: **in progress**, not complete. Tracking each
 backlog item honestly rather than marking the phase done early.
+
+## Amazon-pattern visual/UX rebuild (2026-09-10)
+
+Asked directly whether the storefront's look/workflows/UX matched
+Amazon's — they didn't, in any dimension (no shared nav, bare
+black/white/zinc default theme, no icon library). Full rebuild per
+`/Users/Suraj/.claude/plans/calm-stargazing-wren.md`: deep-navy +
+accent-blue design tokens (`globals.css`), a real header/mega-nav/
+footer (none existed before — `Header.tsx`, `CategoryNav.tsx`,
+`SearchBar.tsx` with live type-ahead via a new
+`/api/search-suggest` route, `Footer.tsx`), a real homepage (was a bare
+connection-check placeholder), a dense `ProductCard` grid reused across
+the homepage/listing/related-products, and a "buy box" product-detail
+redesign (real image gallery from `Product.media`, breadcrumbs, star
+ratings, stock badges, a staff-set "featured" badge, related products,
+and a reviews section) plus order-tracking on the account page.
+
+Every Amazon UX staple that needs data this instance doesn't have
+(reviews, personalized recommendations, sponsored placements) is wired
+to a real, if currently empty, data source rather than faked — same
+discipline as the rest of this project. Full detail, including what's
+explicitly out of scope (review *submission*, e.g.), is in the plan
+file above.
+
+Two real bugs found and fixed during live verification, both worth
+knowing about for any future page that renders real images or refetches
+already-queried data:
+- **Next.js 16's image optimizer blocks fetching from a hostname that
+  resolves to a private/loopback IP by default** (a real SSRF
+  protection) — silently 400s every product image against local Saleor
+  otherwise. Fixed with `images.dangerouslyAllowLocalIP: true` in
+  `next.config.ts`, the same "real, dev-only relaxation" reasoning
+  already used for `HTTP_IP_FILTER_ENABLED=False`.
+- **The same urql module-singleton document-cache staleness bug found
+  earlier for product search recurred** for `ProductDetailDocument`
+  and `CheckoutDetailsDocument` (the latter meaning cart/checkout
+  totals could go stale) — both now use `requestPolicy: "network-only"`
+  like the original fix.
 
 ## Done and verified
 

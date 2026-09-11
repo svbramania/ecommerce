@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { requestPasswordReset } from "@/app/actions/auth";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export function ResetPasswordForm() {
   const [email, setEmail] = useState("");
@@ -31,22 +33,17 @@ export function ResetPasswordForm() {
       <label htmlFor="reset-email" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
         Email
       </label>
-      <input
+      <Input
         id="reset-email"
         type="email"
         required
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="rounded border border-black/15 p-2 text-sm dark:border-white/15 dark:bg-zinc-900"
       />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-      >
+      <Button type="submit" variant="primary" disabled={isPending}>
         Send reset link
-      </button>
+      </Button>
     </form>
   );
 }

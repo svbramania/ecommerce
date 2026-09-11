@@ -14,6 +14,7 @@ import {
   chargeAndCompleteCheckout,
   completeAfterAction,
 } from "@/app/actions/payment";
+import { Button } from "@/components/ui/Button";
 
 function CardForm({ amount }: { amount: number }) {
   const stripe = useStripe();
@@ -79,18 +80,25 @@ function CardForm({ amount }: { amount: number }) {
         <div
           role="group"
           aria-labelledby="card-details-label"
-          className="mt-1 rounded border border-black/15 p-3 dark:border-white/15"
+          className="mt-1 rounded-md border border-border bg-white p-3"
         >
-          <CardElement options={{ style: { base: { fontSize: "14px" } } }} />
+          {/* Stripe's CardElement styles itself via this JS options object
+              inside its own iframe — it cannot read the app's CSS custom
+              properties, so the navy text color is hardcoded literally here
+              as a deliberate, flagged exception to "use tokens everywhere".
+              The wrapper is pinned to a white background regardless of
+              theme (same reasoning as the header search bar) rather than
+              guessing one text color that reads on both a light and dark
+              surface — confirmed live in dark mode that a dark-navy-on-dark
+              -surface combination was unreadable before this fix. */}
+          <CardElement
+            options={{ style: { base: { fontSize: "14px", color: "#0f172a" } } }}
+          />
         </div>
       </div>
-      <button
-        type="submit"
-        disabled={!stripe || isPending}
-        className="rounded-full bg-black px-5 py-3 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-      >
+      <Button type="submit" variant="primary" disabled={!stripe || isPending}>
         {isPending ? "Charging…" : `Pay ${amount.toFixed(2)}`}
-      </button>
+      </Button>
       {error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {error}

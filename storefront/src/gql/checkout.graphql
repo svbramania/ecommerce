@@ -62,6 +62,10 @@ fragment CheckoutFields on Checkout {
       product {
         name
         slug
+        thumbnail {
+          url
+          alt
+        }
       }
     }
   }
