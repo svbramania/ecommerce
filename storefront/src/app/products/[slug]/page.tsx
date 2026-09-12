@@ -10,6 +10,7 @@ import { StarRating } from "@/components/StarRating";
 import { StockBadge } from "@/components/StockBadge";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ReviewsSection } from "@/components/ReviewsSection";
+import { ProductSpecifications } from "@/components/ProductSpecifications";
 
 export default async function ProductDetailPage({
   params,
@@ -130,6 +131,13 @@ export default async function ProductDetailPage({
         </div>
 
         <div className="mt-12 flex flex-col gap-12">
+          <ProductSpecifications
+            sku={variants[0]?.sku}
+            category={product.category}
+            created={product.created}
+            weight={product.weight ?? variants[0]?.weight}
+            assignedAttributes={product.assignedAttributes}
+          />
           {product.category && (
             <RelatedProducts categoryId={product.category.id} excludeProductId={product.id} />
           )}

@@ -20,7 +20,13 @@ export async function Footer() {
   ]);
 
   const shopName = shopResult.data?.shop?.name ?? "Store";
-  const categories = categoriesResult.data?.categories?.edges.map((e) => e.node) ?? [];
+  // Saleor auto-creates a "Default Category" placeholder root category on
+  // every install — it's not a real merchandising category, so it's
+  // filtered out of the customer-facing shop list here (CategoryNav/
+  // LeftNavDrawer still show the full raw tree elsewhere).
+  const categories = (categoriesResult.data?.categories?.edges.map((e) => e.node) ?? []).filter(
+    (c) => c.slug !== "default-category",
+  );
 
   return (
     <footer className="mt-auto border-t border-border bg-header-bg text-header-fg">
@@ -84,6 +90,14 @@ export async function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 px-4 py-6 text-center text-xs text-header-fg/60">
+        <p className="mb-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
+          <Link href="/privacy" className="hover:underline">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:underline">
+            Terms of Use
+          </Link>
+        </p>
         &copy; {new Date().getFullYear()} {shopName}
       </div>
     </footer>

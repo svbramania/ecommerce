@@ -4,6 +4,11 @@ query ProductDetail($slug: String!, $channel: String!) {
     name
     description
     rating
+    created
+    weight {
+      value
+      unit
+    }
     category {
       id
       name
@@ -22,9 +27,43 @@ query ProductDetail($slug: String!, $channel: String!) {
     }
     reviewsMetadata: metafield(key: "reviews")
     bundleComponents: metafield(key: "bundle_components")
+    assignedAttributes {
+      attribute {
+        name
+        visibleInStorefront
+      }
+      __typename
+      ... on AssignedPlainTextAttribute {
+        plainTextValue: value
+      }
+      ... on AssignedTextAttribute {
+        richTextValue: value
+      }
+      ... on AssignedSingleChoiceAttribute {
+        choiceValue: value {
+          name
+        }
+      }
+      ... on AssignedMultiChoiceAttribute {
+        multiChoiceValue: value {
+          name
+        }
+      }
+      ... on AssignedNumericAttribute {
+        numericValue: value
+      }
+      ... on AssignedBooleanAttribute {
+        booleanValue: value
+      }
+    }
     variants {
       id
       name
+      sku
+      weight {
+        value
+        unit
+      }
       quantityAvailable
       pricing {
         price {
