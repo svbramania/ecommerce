@@ -6,6 +6,7 @@ import { getStoredCheckoutId, fetchCheckout } from "@/lib/checkout";
 import { ShopInfoDocument, ProductCategoriesDocument } from "@/gql/generated/graphql";
 import { SearchBar } from "@/components/SearchBar";
 import { CategoryNav } from "@/components/CategoryNav";
+import { LeftNavDrawer } from "@/components/LeftNavDrawer";
 
 export async function Header() {
   // network-only on both — this component renders on every page via the
@@ -40,6 +41,8 @@ export async function Header() {
     <header className="sticky top-0 z-30">
       <div className="bg-header-bg">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4">
+          <LeftNavDrawer categories={rootCategories} isSignedIn={Boolean(customerToken)} />
+
           <Link href="/" className="shrink-0 text-lg font-bold text-header-fg">
             {shop?.name ?? "Store"}
           </Link>
