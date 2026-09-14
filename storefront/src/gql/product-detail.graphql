@@ -3,6 +3,7 @@ query ProductDetail($slug: String!, $channel: String!) {
     id
     name
     description
+    seoDescription
     rating
     created
     weight {

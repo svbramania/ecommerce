@@ -1,6 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { fetchCheckout, getStoredCheckoutId } from "@/lib/checkout";
 import { CartLineRow } from "@/components/CartLineRow";
+
+export const metadata: Metadata = {
+  title: "Cart",
+};
 
 export default async function CartPage() {
   const checkoutId = await getStoredCheckoutId();

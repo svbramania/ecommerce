@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { saleorClient } from "@/lib/saleor-client";
 import {
   ProductListDocument,
@@ -11,6 +12,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { sortBySalesCount } from "@/lib/sort";
 import { fetchAllProducts } from "@/lib/products";
+
+export const metadata: Metadata = {
+  title: "All Products",
+};
 
 const DEFAULT_CHANNEL = "default-channel";
 

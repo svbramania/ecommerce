@@ -1,9 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { fetchCheckout, getStoredCheckoutId } from "@/lib/checkout";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { PromoCodeForm } from "@/components/PromoCodeForm";
 import { PaymentForm } from "@/components/PaymentForm";
 import { PaypalButton } from "@/components/PaypalButton";
+
+export const metadata: Metadata = {
+  title: "Checkout",
+};
 
 export default async function CheckoutPage() {
   const checkoutId = await getStoredCheckoutId();

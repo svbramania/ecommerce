@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { authedClient, getCustomerToken } from "@/lib/auth";
 import { CurrentUserDocument, CurrentUserOrdersDocument } from "@/gql/generated/graphql";
 import { LogoutButton } from "@/components/LogoutButton";
+
+export const metadata: Metadata = {
+  title: "Your Account",
+};
 
 export default async function AccountPage() {
   const token = await getCustomerToken();

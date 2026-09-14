@@ -1,9 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCustomerToken } from "@/lib/auth";
 import { listMyRegistries } from "@/lib/giftRegistry";
 import { CreateRegistryForm } from "@/components/CreateRegistryForm";
 import { DeleteRegistryButton } from "@/components/DeleteRegistryButton";
+
+export const metadata: Metadata = {
+  title: "Your Registries",
+};
 
 export default async function RegistriesPage() {
   const token = await getCustomerToken();

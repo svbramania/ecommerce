@@ -1,8 +1,24 @@
 import Link from "next/link";
 import Image from "next/image";
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicRegistry } from "@/lib/giftRegistry";
 import { MarkPurchasedButton } from "@/components/MarkPurchasedButton";
+
+// Dedupes the sidecar-service lookup between generateMetadata and the page
+// component itself — same reasoning as fetchProduct in products/[slug].
+const fetchRegistry = cache(getPublicRegistry);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const registry = await fetchRegistry(slug);
+  return { title: registry ? registry.title : "Registry" };
+}
 
 export default async function PublicRegistryPage({
   params,
@@ -10,7 +26,7 @@ export default async function PublicRegistryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const registry = await getPublicRegistry(slug);
+  const registry = await fetchRegistry(slug);
   if (!registry) notFound();
 
   return (

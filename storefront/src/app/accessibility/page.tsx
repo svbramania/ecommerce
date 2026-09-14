@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HighContrastToggle } from "@/components/HighContrastToggle";
 
 export const metadata: Metadata = {
   title: "Accessibility Statement",
@@ -25,6 +26,11 @@ export default function AccessibilityPage() {
             haven&apos;t had a formal third-party accessibility audit — we won&apos;t claim
             full compliance we haven&apos;t verified.
           </p>
+
+          <section>
+            <h2 className="mb-2 text-base font-semibold text-foreground">Display settings</h2>
+            <HighContrastToggle />
+          </section>
 
           <section>
             <h2 className="mb-2 text-base font-semibold text-foreground">
@@ -61,9 +67,17 @@ export default function AccessibilityPage() {
                 background — checked with actual contrast-ratio math, not eyeballed.
               </li>
               <li>
+                Stock and order status (&quot;In stock&quot;, &quot;Only 2 left&quot;,
+                &quot;Out of stock&quot;) are always shown as text, not conveyed by color alone —
+                this matters for colorblind users, who can&apos;t rely on green-vs-red to tell
+                those states apart, and the high-contrast toggle above doesn&apos;t change that
+                reliance on color anywhere on the site.
+              </li>
+              <li>
                 Product images without a rating or stock information show that honestly (e.g.
                 &quot;No ratings yet&quot;) instead of hiding the space or guessing.
               </li>
+              <li>Motion respects your system&apos;s &quot;reduce motion&quot; setting.</li>
             </ul>
           </section>
 
@@ -82,6 +96,22 @@ export default function AccessibilityPage() {
               every one of those would clutter the page — if you hit one of those and it&apos;s
               not working well for you, let us know.
             </p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-base font-semibold text-foreground">Known limitations</h2>
+            <p>Being honest about what&apos;s not done yet:</p>
+            <ul className="mt-2 list-inside list-disc space-y-1">
+              <li>
+                We haven&apos;t run this site through real assistive technology beyond our own
+                testing (a screen reader, a switch device, Windows High Contrast/forced-colors
+                mode) or had a formal third-party audit or VPAT done.
+              </li>
+              <li>
+                If your session is inactive for a long time at checkout, it can expire without a
+                warning beforehand — we haven&apos;t built that warning yet.
+              </li>
+            </ul>
           </section>
 
           <section>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
@@ -15,31 +17,38 @@ import { AddToRegistryControl } from "@/components/AddToRegistryControl";
 import { getCustomerToken } from "@/lib/auth";
 import { listMyRegistries } from "@/lib/giftRegistry";
 
+// react's cache() dedupes this within a single request — generateMetadata
+// and the page component both need the product, and without this they'd
+// fire two real network queries for the same slug on every request.
+const fetchProduct = cache(async (slug: string) => {
+  const result = await saleorClient
+    .query(ProductDetailDocument, { slug, channel: DEFAULT_CHANNEL }, { requestPolicy: "network-only" })
+    .toPromise();
+  return result.data?.product;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
+  if (!product) return {};
+  return { title: product.name, description: product.seoDescription || undefined };
+}
+
 export default async function ProductDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [productResult, shopResult] = await Promise.all([
-    // urql's document cache is keyed per query+variables with no TTL, and
-    // saleorClient is a module-level singleton reused across requests in
-    // the same server process — confirmed live (again) that editing a
-    // product's real media/stock/etc. after the first request keeps
-    // serving the pre-edit response forever after otherwise. Same fix
-    // already applied to the product-list search query for the same
-    // reason.
-    saleorClient
-      .query(
-        ProductDetailDocument,
-        { slug, channel: DEFAULT_CHANNEL },
-        { requestPolicy: "network-only" },
-      )
-      .toPromise(),
+  const [product, shopResult] = await Promise.all([
+    fetchProduct(slug),
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
   ]);
 
-  const product = productResult.data?.product;
   if (!product) notFound();
 
   const shopName = shopResult.data?.shop?.name;
