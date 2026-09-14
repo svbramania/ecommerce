@@ -7,6 +7,7 @@ import { ShopInfoDocument, ProductCategoriesDocument } from "@/gql/generated/gra
 import { SearchBar } from "@/components/SearchBar";
 import { CategoryNav } from "@/components/CategoryNav";
 import { LeftNavDrawer } from "@/components/LeftNavDrawer";
+import { Logo } from "@/components/Logo";
 
 export async function Header() {
   // network-only on both — this component renders on every page via the
@@ -43,7 +44,8 @@ export async function Header() {
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4">
           <LeftNavDrawer categories={rootCategories} isSignedIn={Boolean(customerToken)} />
 
-          <Link href="/" className="shrink-0 text-lg font-bold text-header-fg">
+          <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-bold text-header-fg">
+            <Logo className="h-7 w-9" />
             {shop?.name ?? "Store"}
           </Link>
 
