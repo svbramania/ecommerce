@@ -44,15 +44,22 @@ export function LeftNavDrawer({
 
   return (
     <>
+      {/* Amazon's real hamburger control always shows visible text ("☰
+          All") next to the icon, not just an icon with an aria-label —
+          confirmed this one had NO visible text before, which fails for
+          both low-vision users who need a visible cue and voice-control
+          users who say what they can see. "Menu" is now real, visible
+          text; aria-label is dropped since the visible text is now itself
+          a sufficient, matching accessible name (WCAG 2.5.3). */}
       <button
         ref={triggerRef}
         type="button"
-        aria-label="Open categories menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center gap-1 text-header-fg"
+        className="flex shrink-0 items-center gap-1 text-sm text-header-fg"
       >
-        <Menu size={22} />
+        <Menu size={22} aria-hidden="true" />
+        <span>Menu</span>
       </button>
 
       {open && (
@@ -81,13 +88,14 @@ export function LeftNavDrawer({
               </span>
               <button
                 type="button"
-                aria-label="Close"
                 onClick={() => {
                   setOpen(false);
                   triggerRef.current?.focus();
                 }}
+                className="flex items-center gap-1 text-sm"
               >
-                <X size={22} />
+                <X size={22} aria-hidden="true" />
+                <span>Close</span>
               </button>
             </div>
 

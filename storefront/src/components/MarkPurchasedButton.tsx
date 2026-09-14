@@ -38,7 +38,11 @@ export function MarkPurchasedButton({
       >
         {disabled ? "Purchased" : isPending ? "Marking…" : "Mark purchased"}
       </Button>
-      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

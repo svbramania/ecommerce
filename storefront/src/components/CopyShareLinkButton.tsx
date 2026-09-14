@@ -27,6 +27,13 @@ export function CopyShareLinkButton({ path }: { path: string }) {
       >
         {copied ? "Copied!" : "Copy link"}
       </Button>
+      {/* The button's own visible text already changes to "Copied!", but a
+          screen reader isn't guaranteed to re-announce a focused button's
+          label change — this explicit status region makes sure it's heard
+          either way. */}
+      <span role="status" className="sr-only">
+        {copied ? "Link copied to clipboard." : ""}
+      </span>
     </div>
   );
 }

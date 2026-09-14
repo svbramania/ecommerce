@@ -18,7 +18,7 @@ export function CartLineRow({ line }: { line: Line }) {
         {thumbnail?.url ? (
           <Image
             src={thumbnail.url}
-            alt={thumbnail.alt ?? line.variant.product.name}
+            alt={thumbnail.alt || line.variant.product.name}
             width={64}
             height={64}
             className="h-16 w-16 shrink-0 rounded-md object-cover"

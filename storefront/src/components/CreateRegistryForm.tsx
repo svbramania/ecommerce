@@ -58,7 +58,11 @@ export function CreateRegistryForm() {
       <Button type="submit" disabled={isPending}>
         {isPending ? "Creating…" : "Create"}
       </Button>
-      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

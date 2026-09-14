@@ -18,7 +18,7 @@ export function ProductGallery({
     media.length > 0
       ? media
       : fallbackThumbnail?.url
-        ? [{ id: "thumbnail", url: fallbackThumbnail.url, alt: fallbackThumbnail.alt ?? productName }]
+        ? [{ id: "thumbnail", url: fallbackThumbnail.url, alt: fallbackThumbnail.alt || productName }]
         : [];
 
   const [activeIndex, setActiveIndex] = useState(0);

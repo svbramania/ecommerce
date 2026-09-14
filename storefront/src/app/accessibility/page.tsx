@@ -40,11 +40,48 @@ export default function AccessibilityPage() {
                 mouse/touch — including proper focus handling when a panel opens and closes.
               </li>
               <li>
+                A &quot;Skip to main content&quot; link is the first focusable thing on every
+                page, so keyboard and voice-control users don&apos;t have to tab or dictate
+                through the header and navigation on every single page.
+              </li>
+              <li>
+                Every interactive control has a real, visible text label — not just an icon
+                with a hidden description. This matters specifically for voice control/dictation
+                software (like macOS Voice Control or Dragon), which works by matching what you
+                say to what&apos;s visibly on screen; an icon-only button with no visible label
+                can be impossible to target that way.
+              </li>
+              <li>
+                Success and error messages (like &quot;Added to cart&quot; or a failed action)
+                are announced to screen readers automatically as they appear, not just shown
+                visually.
+              </li>
+              <li>
+                Text and icon colors meet WCAG&apos;s minimum contrast ratios against their
+                background — checked with actual contrast-ratio math, not eyeballed.
+              </li>
+              <li>
                 Product images without a rating or stock information show that honestly (e.g.
                 &quot;No ratings yet&quot;) instead of hiding the space or guessing.
               </li>
-              <li>Every interactive icon-only control has a real text label for screen readers.</li>
             </ul>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-base font-semibold text-foreground">
+              Dictation and voice control
+            </h2>
+            <p>
+              If you navigate by voice, every button and link on this site is built to have a
+              real, visible label you can say out loud to activate it (for example, saying
+              &quot;click add to cart&quot; targets a button that&apos;s actually labeled
+              &quot;Add to cart&quot;, not a hidden description that doesn&apos;t match what you
+              see). A small number of compact icon-only controls (like the arrow that expands a
+              subcategory) rely on your voice control software&apos;s built-in
+              &quot;show numbers&quot; overlay feature instead, since adding visible text to
+              every one of those would clutter the page — if you hit one of those and it&apos;s
+              not working well for you, let us know.
+            </p>
           </section>
 
           <section>

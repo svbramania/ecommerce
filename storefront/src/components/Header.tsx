@@ -81,12 +81,21 @@ export async function Header() {
 
           <SearchBar />
 
+          {/* sr-only (not `hidden`) below narrow widths: `hidden` is
+              display:none, which removes text from the accessibility tree
+              entirely — confirmed live that left these links with NO
+              accessible name at all on a narrow viewport. sr-only keeps the
+              real word in the accessible name/DOM at every width (so a
+              screen reader always announces "Cart"/"Sign in", and voice
+              control has a real name to match against), just hidden
+              visually below sm to avoid the overflow this was originally
+              added to prevent. */}
           <Link
             href={customerToken ? "/account" : "/login"}
             className="flex shrink-0 items-center gap-1 text-sm text-header-fg hover:underline"
           >
-            <User size={18} />
-            <span className="hidden sm:inline">{customerToken ? "Account" : "Sign in"}</span>
+            <User size={18} aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">{customerToken ? "Account" : "Sign in"}</span>
           </Link>
 
           <Link
@@ -94,14 +103,16 @@ export async function Header() {
             className="flex shrink-0 items-center gap-1 text-sm text-header-fg hover:underline"
           >
             <span className="relative">
-              <ShoppingCart size={20} />
+              <ShoppingCart size={20} aria-hidden="true" />
               {cartCount > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
                   {cartCount}
                 </span>
               )}
             </span>
-            <span className="hidden sm:inline">Cart</span>
+            <span className="sr-only sm:not-sr-only">
+              Cart{cartCount > 0 ? ` (${cartCount} item${cartCount === 1 ? "" : "s"})` : ""}
+            </span>
           </Link>
         </div>
 

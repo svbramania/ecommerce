@@ -22,7 +22,11 @@
   --accent-fg: #ffffff;
 
   --price: #0f1b3d;
-  --rating-star: #f5a623;
+  /* #f5a623 (the original gold) only hits 2.03:1 against this surface —
+     WCAG 1.4.11 requires 3:1 for a meaningful icon like a star rating.
+     #a8790a hits 3.89:1 here, comfortably over the minimum, while still
+     reading as gold rather than drifting toward brown. */
+  --rating-star: #a8790a;
 
   --stock-ok-bg: #e7f6ec;
   --stock-ok-fg: #146c2e;

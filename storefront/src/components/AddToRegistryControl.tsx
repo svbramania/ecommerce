@@ -45,6 +45,7 @@ export function AddToRegistryControl({
       <select
         value={selectedId}
         onChange={(e) => setSelectedId(e.target.value)}
+        aria-label="Choose a registry"
         className="rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground"
       >
         {registries.map((r) => (
@@ -66,7 +67,11 @@ export function AddToRegistryControl({
       >
         {isPending ? "Adding…" : "Add to registry"}
       </Button>
-      {message && <span className="text-xs text-zinc-500">{message}</span>}
+      {message && (
+        <span role="status" className="text-xs text-zinc-500">
+          {message}
+        </span>
+      )}
     </div>
   );
 }

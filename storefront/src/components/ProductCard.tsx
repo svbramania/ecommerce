@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: ProductCardFieldsFragment })
         {product.thumbnail?.url ? (
           <Image
             src={product.thumbnail.url}
-            alt={product.thumbnail.alt ?? product.name}
+            alt={product.thumbnail.alt || product.name}
             width={200}
             height={200}
             className="aspect-square w-full rounded-md object-cover"

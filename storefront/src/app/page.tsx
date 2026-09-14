@@ -49,7 +49,7 @@ export default async function Home() {
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-foreground">Shop all products</h2>
-          <Link href="/products" className="text-sm text-accent hover:underline">
+          <Link href="/products" className="text-sm text-accent underline">
             See all &rarr;
           </Link>
         </div>

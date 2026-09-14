@@ -96,7 +96,7 @@ export function SearchBar() {
           // in dark mode) — text-foreground would go light-on-white in
           // dark mode, so this input fixes a dark text color instead of
           // using the theme-flipping token.
-          className="w-full min-w-0 rounded-l-md px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
+          className="w-full min-w-0 rounded-l-md px-3 py-2 text-sm text-zinc-900 outline-none ring-2 ring-inset ring-transparent focus:ring-accent placeholder:text-zinc-500"
         />
         <button
           type="submit"
