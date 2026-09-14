@@ -126,18 +126,20 @@ export async function Footer() {
                 Accessibility
               </Link>
             </li>
+            <li>
+              <Link href="/privacy" className="hover:underline">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="hover:underline">
+                Terms of Use
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
       <div className="border-t border-white/10 px-4 py-6 text-center text-xs text-header-fg/60">
-        <p className="mb-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
-          <Link href="/privacy" className="hover:underline">
-            Privacy Policy
-          </Link>
-          <Link href="/terms" className="hover:underline">
-            Terms of Use
-          </Link>
-        </p>
         &copy; {new Date().getFullYear()} {shopName}
       </div>
     </footer>
