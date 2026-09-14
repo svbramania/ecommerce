@@ -3,6 +3,8 @@ import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
 import { ShopInfoDocument, ProductListDocument } from "@/gql/generated/graphql";
 import { ProductCard } from "@/components/ProductCard";
+import { sortBySalesCount } from "@/lib/sort";
+import { fetchAllProducts } from "@/lib/products";
 
 export default async function Home() {
   // network-only on both — same module-singleton urql cache staleness bug
@@ -10,15 +12,12 @@ export default async function Home() {
   // comment in lib/checkout.ts): without it, the homepage grid would keep
   // showing whatever the catalog looked like on this query's first-ever
   // request, not reflecting later admin edits.
-  const [shopResult, gridResult, newArrivalsResult] = await Promise.all([
+  const [shopResult, allProducts, newArrivalsResult] = await Promise.all([
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
-    saleorClient
-      .query(
-        ProductListDocument,
-        { first: 12, channel: DEFAULT_CHANNEL },
-        { requestPolicy: "network-only" },
-      )
-      .toPromise(),
+    // Pages through the whole catalog (see lib/products.ts) — ranking by
+    // real sales_count is only correct if every product was actually in
+    // the pool being ranked.
+    fetchAllProducts(),
     saleorClient
       .query(
         ProductListDocument,
@@ -33,7 +32,7 @@ export default async function Home() {
   ]);
 
   const shop = shopResult.data?.shop;
-  const products = gridResult.data?.products?.edges.map((e) => e.node) ?? [];
+  const products = sortBySalesCount(allProducts).slice(0, 12);
   const newArrivals = newArrivalsResult.data?.products?.edges.map((e) => e.node) ?? [];
 
   return (

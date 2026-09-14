@@ -9,6 +9,8 @@ import {
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { sortBySalesCount } from "@/lib/sort";
+import { fetchAllProducts } from "@/lib/products";
 
 const DEFAULT_CHANNEL = "default-channel";
 
@@ -67,21 +69,35 @@ export default async function ProductsPage({
   const filter = buildFilter(params);
   const sortBy = buildSortBy(params.sort);
 
-  const [productsResult, categoriesResult] = await Promise.all([
-    saleorClient
-      .query(
-        ProductListDocument,
-        { first: 24, channel: DEFAULT_CHANNEL, filter, sortBy },
-        // urql's default document cache is keyed per query+variables with no
-        // TTL, and this client is a module-level singleton reused across
-        // requests in the same server process — confirmed live that a
-        // legitimately-empty search result (e.g. queried before Saleor's
-        // async search-index task had run) gets cached and served stale
-        // forever after. Search/filter results must reflect current data on
-        // every request, so bypass the cache here.
-        { requestPolicy: "network-only" },
-      )
-      .toPromise(),
+  // No explicit sort chosen and not a text search -> default to real
+  // best-selling order (see lib/sort.ts and
+  // backend/apps/sales_rank/README.md for why this can't be a server-side
+  // Saleor sortBy). That requires ranking the WHOLE matching set, not just
+  // one page of it — Saleor's own default order (no sortBy) is
+  // alphabetical by name, confirmed live to put real best-sellers outside
+  // a single 24-item page purely by name coincidence. An explicit sort
+  // choice or an active search query is left to Saleor's own real
+  // server-side order instead, fetched one page at a time as before.
+  const useBestSelling = !params.sort && !params.q;
+
+  const [productsPageResult, allProductsForRanking, categoriesResult] = await Promise.all([
+    useBestSelling
+      ? Promise.resolve(null)
+      : saleorClient
+          .query(
+            ProductListDocument,
+            { first: 24, channel: DEFAULT_CHANNEL, filter, sortBy },
+            // urql's default document cache is keyed per query+variables with
+            // no TTL, and this client is a module-level singleton reused
+            // across requests in the same server process — confirmed live
+            // that a legitimately-empty search result (e.g. queried before
+            // Saleor's async search-index task had run) gets cached and
+            // served stale forever after. Search/filter results must reflect
+            // current data on every request, so bypass the cache here.
+            { requestPolicy: "network-only" },
+          )
+          .toPromise(),
+    useBestSelling ? fetchAllProducts(filter) : Promise.resolve(null),
     // Same module-singleton-cache reasoning as ProductList above — an
     // admin adding/editing categories should show up immediately, not only
     // after this exact query+variables combination happens to be evicted.
@@ -90,8 +106,12 @@ export default async function ProductsPage({
       .toPromise(),
   ]);
 
-  const products = productsResult.data?.products?.edges.map((e) => e.node) ?? [];
-  const totalCount = productsResult.data?.products?.totalCount ?? 0;
+  const products = useBestSelling
+    ? sortBySalesCount(allProductsForRanking ?? []).slice(0, 24)
+    : (productsPageResult?.data?.products?.edges.map((e) => e.node) ?? []);
+  const totalCount = useBestSelling
+    ? (allProductsForRanking?.length ?? 0)
+    : (productsPageResult?.data?.products?.totalCount ?? 0);
   // Empty categories (no products on this channel) are filtered out — an
   // "All categories" filter option that returns zero results either way is
   // just noise in the dropdown.
@@ -188,7 +208,7 @@ export default async function ProductsPage({
               defaultValue={params.sort ?? ""}
               className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground"
             >
-              <option value="">Relevance</option>
+              <option value="">Best selling</option>
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
@@ -219,13 +239,13 @@ export default async function ProductsPage({
           )}
         </form>
 
-        {productsResult.error && (
+        {productsPageResult?.error && (
           <p className="text-sm text-red-600 dark:text-red-400">
-            Could not load products: {productsResult.error.message}
+            Could not load products: {productsPageResult.error.message}
           </p>
         )}
 
-        {!productsResult.error && products.length === 0 && !hasActiveFilters && (
+        {!productsPageResult?.error && products.length === 0 && !hasActiveFilters && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               No products yet — this is a genuinely empty catalog, not a
@@ -238,7 +258,7 @@ export default async function ProductsPage({
           </div>
         )}
 
-        {!productsResult.error && products.length === 0 && hasActiveFilters && (
+        {!productsPageResult?.error && products.length === 0 && hasActiveFilters && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               No products match these filters. Try clearing one or more of

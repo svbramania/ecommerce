@@ -4,6 +4,7 @@ fragment ProductCardFields on Product {
   slug
   rating
   featured: metafield(key: "featured")
+  salesCount: metafield(key: "sales_count")
   thumbnail {
     url
     alt
@@ -25,12 +26,17 @@ fragment ProductCardFields on Product {
 
 query ProductList(
   $first: Int!
+  $after: String
   $channel: String!
   $filter: ProductFilterInput
   $sortBy: ProductOrder
 ) {
-  products(first: $first, channel: $channel, filter: $filter, sortBy: $sortBy) {
+  products(first: $first, after: $after, channel: $channel, filter: $filter, sortBy: $sortBy) {
     totalCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
     edges {
       node {
         ...ProductCardFields
