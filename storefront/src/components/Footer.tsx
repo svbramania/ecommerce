@@ -4,13 +4,17 @@ import { getCustomerToken } from "@/lib/auth";
 import { ShopInfoDocument, ProductCategoriesDocument } from "@/gql/generated/graphql";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
 
-// A larger, Amazon-style multi-column sitemap — but every link here goes
-// to a route or category that actually exists. No "Careers"/"Press"/
-// "Investor Relations"/"Help Center" columns: this app has no pages
-// behind those, and inventing them would misrepresent the site the same
-// way fake product data would. Two real columns (Shop, Your Account)
-// plus the real category tree is what's honestly available today; add
-// more columns only when real pages exist for them.
+// Matches Amazon's real footer column structure ("Let Us Help You", "Get
+// to Know Us") where this app has real functionality behind the link —
+// Your Orders/Registry & Gift List/Shipping/Returns/Help/About/
+// Accessibility are all real pages built for this, not placeholders.
+// Deliberately excludes the Amazon footer categories that would require
+// fabricating a business that doesn't exist here: Careers (no real job
+// openings), Investor Relations/Press (not a public company, no press),
+// Sell on [Store]/Become an Affiliate/Advertise (no real
+// marketplace/affiliate/ad program), Amazon Payment Products (no store
+// credit card or points program). Inventing those would misrepresent the
+// business the same way fake product data would.
 export async function Footer() {
   const [shopResult, categoriesResult, customerToken] = await Promise.all([
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
@@ -54,7 +58,7 @@ export async function Footer() {
 
         <div>
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
-            Your account
+            Let Us Help You
           </h2>
           <ul className="flex flex-col gap-2">
             <li>
@@ -64,7 +68,7 @@ export async function Footer() {
             </li>
             <li>
               <Link href={customerToken ? "/account" : "/login"} className="hover:underline">
-                {customerToken ? "Account" : "Sign in"}
+                {customerToken ? "Your Account" : "Sign in"}
               </Link>
             </li>
             {!customerToken && (
@@ -74,17 +78,52 @@ export async function Footer() {
                 </Link>
               </li>
             )}
+            <li>
+              <Link href="/account" className="hover:underline">
+                Your Orders
+              </Link>
+            </li>
+            <li>
+              <Link href="/account/registries" className="hover:underline">
+                Registry & Gift List
+              </Link>
+            </li>
+            <li>
+              <Link href="/shipping" className="hover:underline">
+                Shipping Rates & Policies
+              </Link>
+            </li>
+            <li>
+              <Link href="/returns" className="hover:underline">
+                Returns & Replacements
+              </Link>
+            </li>
+            <li>
+              <Link href="/help" className="hover:underline">
+                Help
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
-            {shopName}
+            Get to Know Us
           </h2>
           <ul className="flex flex-col gap-2">
             <li>
               <Link href="/" className="hover:underline">
-                Home
+                {shopName} Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="hover:underline">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link href="/accessibility" className="hover:underline">
+                Accessibility
               </Link>
             </li>
           </ul>

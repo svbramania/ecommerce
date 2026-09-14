@@ -156,6 +156,28 @@ services:
     ports:
       - "8093:8083"
 
+  gift-registry:
+    # Amazon-style "Registry & Gift List" — see
+    # backend/apps/gift_registry/service.py for why this is its own
+    # sidecar rather than Saleor customer metadata (a stranger can't read
+    # another customer's metadata via the public API — confirmed live) or
+    # a model merged into Saleor's own backend. Needs real persistence
+    # across requests, unlike the stateless webhook receivers above, so it
+    # gets its own named volume for the SQLite file.
+    image: python:3.12-slim
+    command: python3 /app/service.py
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - ./backend/apps/gift_registry:/app:ro
+      - gift-registry-data:/data
+    environment:
+      - SALEOR_API_URL=http://api:8000/graphql/
+      - GIFT_REGISTRY_CHANNEL=default-channel
+    ports:
+      - "8094:8080"
+
   graphql-introspection-guard:
     # The real, public-facing GraphQL entry point — see
     # backend/apps/graphql_introspection_guard/proxy.py for why this
@@ -179,3 +201,4 @@ volumes:
   saleor-db:
   saleor-cache:
   saleor-media:
+  gift-registry-data:

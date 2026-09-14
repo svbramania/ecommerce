@@ -11,6 +11,9 @@ import { StockBadge } from "@/components/StockBadge";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { ProductSpecifications } from "@/components/ProductSpecifications";
+import { AddToRegistryControl } from "@/components/AddToRegistryControl";
+import { getCustomerToken } from "@/lib/auth";
+import { listMyRegistries } from "@/lib/giftRegistry";
 
 export default async function ProductDetailPage({
   params,
@@ -40,6 +43,8 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   const shopName = shopResult.data?.shop?.name;
+  const customerToken = await getCustomerToken();
+  const myRegistries = customerToken ? await listMyRegistries(customerToken) : [];
   const variants = product.variants?.filter((v): v is NonNullable<typeof v> => v != null) ?? [];
 
   // Bundles are ordinary products whose metadata records the real
@@ -121,6 +126,12 @@ export default async function ProductDetailPage({
             )}
 
             <AddToCartForm variants={variants} />
+
+            <AddToRegistryControl
+              productId={product.id}
+              isSignedIn={Boolean(customerToken)}
+              registries={myRegistries.map((r) => ({ id: r.id, title: r.title }))}
+            />
 
             {shopName && (
               <p className="text-xs text-zinc-500">
