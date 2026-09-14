@@ -86,13 +86,18 @@ export default async function ProductsPage({
     // admin adding/editing categories should show up immediately, not only
     // after this exact query+variables combination happens to be evicted.
     saleorClient
-      .query(ProductCategoriesDocument, {}, { requestPolicy: "network-only" })
+      .query(ProductCategoriesDocument, { channel: DEFAULT_CHANNEL }, { requestPolicy: "network-only" })
       .toPromise(),
   ]);
 
   const products = productsResult.data?.products?.edges.map((e) => e.node) ?? [];
   const totalCount = productsResult.data?.products?.totalCount ?? 0;
-  const categories = categoriesResult.data?.categories?.edges.map((e) => e.node) ?? [];
+  // Empty categories (no products on this channel) are filtered out — an
+  // "All categories" filter option that returns zero results either way is
+  // just noise in the dropdown.
+  const categories = (categoriesResult.data?.categories?.edges.map((e) => e.node) ?? []).filter(
+    (c) => !c.parent && (c.products?.totalCount ?? 0) > 0,
+  );
   const hasActiveFilters = Boolean(
     params.q || params.category || params.minPrice || params.maxPrice || params.inStock,
   );

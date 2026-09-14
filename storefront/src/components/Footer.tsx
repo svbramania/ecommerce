@@ -2,6 +2,7 @@ import Link from "next/link";
 import { saleorClient } from "@/lib/saleor-client";
 import { getCustomerToken } from "@/lib/auth";
 import { ShopInfoDocument, ProductCategoriesDocument } from "@/gql/generated/graphql";
+import { DEFAULT_CHANNEL } from "@/lib/checkout";
 
 // A larger, Amazon-style multi-column sitemap — but every link here goes
 // to a route or category that actually exists. No "Careers"/"Press"/
@@ -14,18 +15,18 @@ export async function Footer() {
   const [shopResult, categoriesResult, customerToken] = await Promise.all([
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
     saleorClient
-      .query(ProductCategoriesDocument, {}, { requestPolicy: "network-only" })
+      .query(ProductCategoriesDocument, { channel: DEFAULT_CHANNEL }, { requestPolicy: "network-only" })
       .toPromise(),
     getCustomerToken(),
   ]);
 
   const shopName = shopResult.data?.shop?.name ?? "Store";
-  // Saleor auto-creates a "Default Category" placeholder root category on
-  // every install — it's not a real merchandising category, so it's
-  // filtered out of the customer-facing shop list here (CategoryNav/
-  // LeftNavDrawer still show the full raw tree elsewhere).
+  // Empty categories (Saleor's auto-created "Default Category" placeholder,
+  // plus any real category with 0 products on this channel) are filtered
+  // out of every customer-facing nav — a category page with nothing in it
+  // reads as a broken link.
   const categories = (categoriesResult.data?.categories?.edges.map((e) => e.node) ?? []).filter(
-    (c) => c.slug !== "default-category",
+    (c) => !c.parent && (c.products?.totalCount ?? 0) > 0,
   );
 
   return (

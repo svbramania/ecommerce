@@ -39,7 +39,7 @@ query ProductList(
   }
 }
 
-query ProductCategories {
+query ProductCategories($channel: String!) {
   categories(first: 100) {
     edges {
       node {
@@ -49,12 +49,18 @@ query ProductCategories {
         parent {
           id
         }
+        products(channel: $channel) {
+          totalCount
+        }
         children(first: 20) {
           edges {
             node {
               id
               name
               slug
+              products(channel: $channel) {
+                totalCount
+              }
             }
           }
         }
