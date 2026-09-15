@@ -3,8 +3,10 @@ import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
 import { ShopInfoDocument, ProductListDocument } from "@/gql/generated/graphql";
 import { ProductCard } from "@/components/ProductCard";
+import { CategoryNav } from "@/components/CategoryNav";
 import { sortBySalesCount } from "@/lib/sort";
 import { fetchAllProducts } from "@/lib/products";
+import { fetchCategories } from "@/lib/categories";
 
 export default async function Home() {
   // network-only on both — same module-singleton urql cache staleness bug
@@ -12,8 +14,12 @@ export default async function Home() {
   // comment in lib/checkout.ts): without it, the homepage grid would keep
   // showing whatever the catalog looked like on this query's first-ever
   // request, not reflecting later admin edits.
-  const [shopResult, allProducts, newArrivalsResult] = await Promise.all([
+  const [shopResult, { featuredCategories }, allProducts, newArrivalsResult] = await Promise.all([
     saleorClient.query(ShopInfoDocument, {}).toPromise(),
+    // Deduped with Header's own call via react's cache() — both need the
+    // same category list on this request (Header's copy is hidden on this
+    // route; see HeaderCategoryNav).
+    fetchCategories(),
     // Pages through the whole catalog (see lib/products.ts) — ranking by
     // real sales_count is only correct if every product was actually in
     // the pool being ranked.
@@ -45,6 +51,8 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      <CategoryNav categories={featuredCategories} />
 
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">

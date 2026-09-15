@@ -28,9 +28,14 @@ export async function Footer() {
   // Empty categories (Saleor's auto-created "Default Category" placeholder,
   // plus any real category with 0 products on this channel) are filtered
   // out of every customer-facing nav — a category page with nothing in it
-  // reads as a broken link.
+  // reads as a broken link. "Amazon Devices & Accessories" is also
+  // excluded here — a real, populated category, but its name only made
+  // sense as an Amazon department; this isn't an Amazon store.
   const categories = (categoriesResult.data?.categories?.edges.map((e) => e.node) ?? []).filter(
-    (c) => !c.parent && (c.products?.totalCount ?? 0) > 0,
+    (c) =>
+      !c.parent &&
+      (c.products?.totalCount ?? 0) > 0 &&
+      c.slug !== "amazon-devices-accessories",
   );
 
   return (
@@ -40,14 +45,17 @@ export async function Footer() {
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
             Shop
           </h2>
-          <ul className="flex flex-col gap-2">
-            <li>
+          {/* columns-2 (not flex/grid) so the list fills the first column
+              top-to-bottom and overflows into the second, rather than
+              running the full category count down a single column. */}
+          <ul className="columns-1 gap-6 sm:columns-2">
+            <li className="mb-2 break-inside-avoid">
               <Link href="/products" className="hover:underline">
                 All products
               </Link>
             </li>
             {categories.map((c) => (
-              <li key={c.id}>
+              <li key={c.id} className="mb-2 break-inside-avoid">
                 <Link href={`/products?category=${c.id}`} className="hover:underline">
                   {c.name}
                 </Link>

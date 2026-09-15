@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  children: { id: string; name: string; slug: string }[];
-};
+import type { NavCategory as Category } from "@/lib/categories";
 
 // Real category tree, recursed as-is — today's real data is one flat
 // category with no children, which renders correctly here as a single item
