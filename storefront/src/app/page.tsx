@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
-import { ShopInfoDocument, ProductListDocument } from "@/gql/generated/graphql";
+import { ProductListDocument } from "@/gql/generated/graphql";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryNav } from "@/components/CategoryNav";
 import { sortBySalesCount } from "@/lib/sort";
@@ -9,13 +9,12 @@ import { fetchAllProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
 
 export default async function Home() {
-  // network-only on both — same module-singleton urql cache staleness bug
-  // found and fixed repeatedly elsewhere in this app (see fetchCheckout's
+  // network-only — same module-singleton urql cache staleness bug found
+  // and fixed repeatedly elsewhere in this app (see fetchCheckout's
   // comment in lib/checkout.ts): without it, the homepage grid would keep
   // showing whatever the catalog looked like on this query's first-ever
   // request, not reflecting later admin edits.
-  const [shopResult, { featuredCategories }, allProducts, newArrivalsResult] = await Promise.all([
-    saleorClient.query(ShopInfoDocument, {}).toPromise(),
+  const [{ featuredCategories }, allProducts, newArrivalsResult] = await Promise.all([
     // Deduped with Header's own call via react's cache() — both need the
     // same category list on this request (Header's copy is hidden on this
     // route; see HeaderCategoryNav).
@@ -37,21 +36,14 @@ export default async function Home() {
       .toPromise(),
   ]);
 
-  const shop = shopResult.data?.shop;
   const products = sortBySalesCount(allProducts).slice(0, 12);
   const newArrivals = newArrivalsResult.data?.products?.edges.map((e) => e.node) ?? [];
 
   return (
     <div className="bg-surface-muted">
-      <section className="bg-header-bg px-6 py-16 text-header-fg">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="text-3xl font-bold">{shop?.name ?? "Store"}</h1>
-          {shop?.description && (
-            <p className="mt-2 max-w-2xl text-header-fg/80">{shop.description}</p>
-          )}
-        </div>
-      </section>
-
+      {/* No hero/title band here — the header's own logo+name (visible on
+          every page) already carries the shop name, so a second, identical
+          "Saleor e-commerce" heading right below it was pure duplication. */}
       <CategoryNav categories={featuredCategories} />
 
       <div className="mx-auto max-w-6xl px-6 py-10">
