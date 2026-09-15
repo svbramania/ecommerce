@@ -40,15 +40,19 @@ export async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-border bg-header-bg text-header-fg">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 text-sm sm:grid-cols-3">
+      {/* divide-x only kicks in at sm+, once the grid is a single row of
+          three (grid-cols-2 on mobile wraps the third item to its own row,
+          where a left border would cut across it rather than sit between
+          columns). */}
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 text-sm sm:grid-cols-3 sm:divide-x sm:divide-white/10">
         <div>
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
             Shop
           </h2>
-          {/* columns-2 (not flex/grid) so the list fills the first column
-              top-to-bottom and overflows into the second, rather than
+          {/* columns-3 (not flex/grid) so the list fills each column
+              top-to-bottom and overflows into the next, rather than
               running the full category count down a single column. */}
-          <ul className="columns-1 gap-6 sm:columns-2">
+          <ul className="columns-1 gap-6 sm:columns-3">
             <li className="mb-2 break-inside-avoid">
               <Link href="/products" className="hover:underline">
                 All products
@@ -64,7 +68,7 @@ export async function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="sm:pl-8">
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
             Let Us Help You
           </h2>
@@ -114,7 +118,7 @@ export async function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="sm:pl-8">
           <h2 className="mb-3 font-semibold uppercase tracking-wide text-header-fg/70">
             Get to Know Us
           </h2>
