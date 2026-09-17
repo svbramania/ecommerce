@@ -70,7 +70,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Analytics />
         </Suspense>
         <Header />
-        <main id="main-content" className="flex-1">
+        {/* tabIndex={-1} is what actually makes the skip link work — found
+            live that without it, activating "Skip to main content"
+            changed the URL hash but left keyboard focus on the link
+            itself, so the very next Tab press landed back in the header
+            it was supposed to bypass. -1 keeps it out of normal Tab order
+            (never focusable by tabbing to it directly), only reachable as
+            the explicit target of the skip link's fragment jump. */}
+        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
           {children}
         </main>
         <Footer />
