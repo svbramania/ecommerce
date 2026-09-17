@@ -64,9 +64,10 @@ export async function login(email: string, password: string): Promise<ActionResu
   if (errorMsg) return { ok: false, error: errorMsg };
 
   const token = result.data?.tokenCreate?.token;
+  const refreshToken = result.data?.tokenCreate?.refreshToken;
   if (!token) return { ok: false, error: "No token returned." };
 
-  await storeCustomerToken(token);
+  await storeCustomerToken(token, refreshToken ?? undefined);
 
   // If the buyer added items to a guest cart before logging in, attach it
   // to their account now — otherwise the resulting order would never
