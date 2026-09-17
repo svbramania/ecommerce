@@ -202,12 +202,21 @@ services:
     # named volume for the SQLite file, same as gift-registry/reviews.
     # NEWSLETTER_ADMIN_TOKEN is a real, dynamically-generated token (see
     # backend/newsletter.env.example) — gitignored like the other
-    # backend/*.env files above, not committed.
+    # backend/*.env files above, not committed. SMTP_HOST/DEFAULT_FROM_EMAIL
+    # point at the same mailpit instance backend/backend.env's EMAIL_URL
+    # already uses for Saleor's own account/order emails.
     image: python:3.12-slim
     command: python3 /app/service.py
     restart: unless-stopped
+    depends_on:
+      - mailpit
     env_file:
       - backend/newsletter.env
+    environment:
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - DEFAULT_FROM_EMAIL=noreply@example.com
+      - NEWSLETTER_CONFIRM_URL_BASE=http://localhost:3000/newsletter/confirm
     volumes:
       - ./backend/apps/newsletter:/app:ro
       - newsletter-data:/data

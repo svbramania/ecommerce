@@ -8,11 +8,31 @@ const NEWSLETTER_API_URL = process.env.NEWSLETTER_API_URL ?? "http://localhost:8
 
 export async function subscribeToNewsletter(
   email: string,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; pendingConfirmation?: boolean; error?: string }> {
   const res = await fetch(`${NEWSLETTER_API_URL}/subscribe`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
+    cache: "no-store",
+  });
+  let data: { error?: string; pendingConfirmation?: boolean } | null = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+  if (!res.ok) return { ok: false, error: data?.error ?? "Could not subscribe." };
+  return { ok: true, pendingConfirmation: data?.pendingConfirmation ?? false };
+}
+
+export async function confirmNewsletterSubscription(
+  email: string,
+  token: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`${NEWSLETTER_API_URL}/confirm`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, token }),
     cache: "no-store",
   });
   let data: { error?: string } | null = null;
@@ -21,6 +41,6 @@ export async function subscribeToNewsletter(
   } catch {
     data = null;
   }
-  if (!res.ok) return { ok: false, error: data?.error ?? "Could not subscribe." };
+  if (!res.ok) return { ok: false, error: data?.error ?? "Could not confirm your subscription." };
   return { ok: true };
 }
