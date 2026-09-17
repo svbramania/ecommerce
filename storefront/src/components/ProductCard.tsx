@@ -4,8 +4,19 @@ import { StarRating } from "@/components/StarRating";
 import { StockBadge } from "@/components/StockBadge";
 import { FeaturedBadge } from "@/components/FeaturedBadge";
 import type { ProductCardFieldsFragment } from "@/gql/generated/graphql";
+import type { ReviewSummary } from "@/lib/reviews";
 
-export function ProductCard({ product }: { product: ProductCardFieldsFragment }) {
+export function ProductCard({
+  product,
+  reviewSummary,
+}: {
+  product: ProductCardFieldsFragment;
+  // Real average/count from the reviews sidecar (backend/apps/reviews),
+  // fetched in one batch call per grid rather than per card. Omitted
+  // (rather than defaulted) just means no batch summary was fetched for
+  // this grid — same "No ratings yet" result either way.
+  reviewSummary?: ReviewSummary;
+}) {
   const price = product.pricing?.priceRange?.start?.gross;
 
   return (
@@ -44,7 +55,7 @@ export function ProductCard({ product }: { product: ProductCardFieldsFragment })
       <span className="line-clamp-2 min-h-10 text-sm font-medium text-foreground">
         {product.name}
       </span>
-      <StarRating rating={product.rating} />
+      <StarRating rating={reviewSummary?.average ?? null} reviewCount={reviewSummary?.count} />
       {/* Fixed-height slot even when a price is somehow absent, so its
           presence/absence never shifts the rows below it. */}
       <span className="min-h-6 text-base font-bold text-price">

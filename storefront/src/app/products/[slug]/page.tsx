@@ -16,6 +16,7 @@ import { ProductSpecifications } from "@/components/ProductSpecifications";
 import { AddToRegistryControl } from "@/components/AddToRegistryControl";
 import { getCustomerToken } from "@/lib/auth";
 import { listMyRegistries } from "@/lib/giftRegistry";
+import { getProductReviews } from "@/lib/reviews";
 
 // react's cache() dedupes this within a single request — generateMetadata
 // and the page component both need the product, and without this they'd
@@ -53,7 +54,10 @@ export default async function ProductDetailPage({
 
   const shopName = shopResult.data?.shop?.name;
   const customerToken = await getCustomerToken();
-  const myRegistries = customerToken ? await listMyRegistries(customerToken) : [];
+  const [myRegistries, { reviews, average, count: reviewCount }] = await Promise.all([
+    customerToken ? listMyRegistries(customerToken) : Promise.resolve([]),
+    getProductReviews(product.id),
+  ]);
   const variants = product.variants?.filter((v): v is NonNullable<typeof v> => v != null) ?? [];
 
   // Bundles are ordinary products whose metadata records the real
@@ -68,16 +72,6 @@ export default async function ProductDetailPage({
       bundleComponents = JSON.parse(product.bundleComponents);
     } catch {
       bundleComponents = null;
-    }
-  }
-
-  let reviewCount = 0;
-  if (product.reviewsMetadata) {
-    try {
-      const parsed = JSON.parse(product.reviewsMetadata);
-      if (Array.isArray(parsed)) reviewCount = parsed.length;
-    } catch {
-      reviewCount = 0;
     }
   }
 
@@ -109,7 +103,7 @@ export default async function ProductDetailPage({
 
           <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-6">
             <h1 className="text-2xl font-semibold text-foreground">{product.name}</h1>
-            <StarRating rating={product.rating} reviewCount={reviewCount} />
+            <StarRating rating={average} reviewCount={reviewCount} />
 
             {variants[0]?.pricing?.price?.gross && (
               <p className="text-2xl font-bold text-price">
@@ -161,7 +155,12 @@ export default async function ProductDetailPage({
           {product.category && (
             <RelatedProducts categoryId={product.category.id} excludeProductId={product.id} />
           )}
-          <ReviewsSection reviewsMetadata={product.reviewsMetadata} />
+          <ReviewsSection
+            reviews={reviews}
+            productId={product.id}
+            productSlug={slug}
+            isSignedIn={Boolean(customerToken)}
+          />
         </div>
       </div>
     </div>

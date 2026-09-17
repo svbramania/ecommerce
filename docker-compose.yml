@@ -178,6 +178,42 @@ services:
     ports:
       - "8094:8080"
 
+  reviews:
+    # Real, customer-submitted product reviews with live verified-purchase
+    # gating — see backend/apps/reviews/service.py for why this is its own
+    # sidecar (same reasoning as gift-registry above). Needs its own named
+    # volume for the SQLite file, same as gift-registry.
+    image: python:3.12-slim
+    command: python3 /app/service.py
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - ./backend/apps/reviews:/app:ro
+      - reviews-data:/data
+    environment:
+      - SALEOR_API_URL=http://api:8000/graphql/
+    ports:
+      - "8095:8080"
+
+  newsletter:
+    # Real email-capture for the marketing plan — see
+    # backend/apps/newsletter/service.py and README.md. Needs its own
+    # named volume for the SQLite file, same as gift-registry/reviews.
+    # NEWSLETTER_ADMIN_TOKEN is a real, dynamically-generated token (see
+    # backend/newsletter.env.example) — gitignored like the other
+    # backend/*.env files above, not committed.
+    image: python:3.12-slim
+    command: python3 /app/service.py
+    restart: unless-stopped
+    env_file:
+      - backend/newsletter.env
+    volumes:
+      - ./backend/apps/newsletter:/app:ro
+      - newsletter-data:/data
+    ports:
+      - "8096:8080"
+
   graphql-introspection-guard:
     # The real, public-facing GraphQL entry point — see
     # backend/apps/graphql_introspection_guard/proxy.py for why this
@@ -202,3 +238,5 @@ volumes:
   saleor-cache:
   saleor-media:
   gift-registry-data:
+  reviews-data:
+  newsletter-data:

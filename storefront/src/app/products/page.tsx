@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { sortBySalesCount } from "@/lib/sort";
 import { fetchAllProducts } from "@/lib/products";
+import { getReviewSummaries } from "@/lib/reviews";
 
 export const metadata: Metadata = {
   title: "All Products",
@@ -126,6 +127,8 @@ export default async function ProductsPage({
   const hasActiveFilters = Boolean(
     params.q || params.category || params.minPrice || params.maxPrice || params.inStock,
   );
+  // One batch call for every card on this page, not one request per card.
+  const reviewSummaries = await getReviewSummaries(products.map((p) => p.id));
 
   return (
     <div className="min-h-screen bg-surface-muted px-6 py-10">
@@ -280,7 +283,7 @@ export default async function ProductsPage({
             <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {products.map((product) => (
                 <li key={product.id}>
-                  <ProductCard product={product} />
+                  <ProductCard product={product} reviewSummary={reviewSummaries[product.id]} />
                 </li>
               ))}
             </ul>

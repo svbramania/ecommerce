@@ -7,6 +7,7 @@ import { CategoryNav } from "@/components/CategoryNav";
 import { sortBySalesCount } from "@/lib/sort";
 import { fetchAllProducts } from "@/lib/products";
 import { fetchCategories } from "@/lib/categories";
+import { getReviewSummaries } from "@/lib/reviews";
 
 export default async function Home() {
   // network-only — same module-singleton urql cache staleness bug found
@@ -38,6 +39,11 @@ export default async function Home() {
 
   const products = sortBySalesCount(allProducts).slice(0, 12);
   const newArrivals = newArrivalsResult.data?.products?.edges.map((e) => e.node) ?? [];
+  // One batch call for every card on the page, not one request per card.
+  const reviewSummaries = await getReviewSummaries([
+    ...products.map((p) => p.id),
+    ...newArrivals.map((p) => p.id),
+  ]);
 
   return (
     <div className="bg-surface-muted">
@@ -72,7 +78,7 @@ export default async function Home() {
           <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {products.map((product) => (
               <li key={product.id}>
-                <ProductCard product={product} />
+                <ProductCard product={product} reviewSummary={reviewSummaries[product.id]} />
               </li>
             ))}
           </ul>
@@ -86,7 +92,7 @@ export default async function Home() {
             <ul className="flex snap-x gap-4 overflow-x-auto pb-2">
               {newArrivals.map((product) => (
                 <li key={product.id} className="w-44 shrink-0 snap-start">
-                  <ProductCard product={product} />
+                  <ProductCard product={product} reviewSummary={reviewSummaries[product.id]} />
                 </li>
               ))}
             </ul>

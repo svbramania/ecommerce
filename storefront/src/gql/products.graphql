@@ -2,7 +2,6 @@ fragment ProductCardFields on Product {
   id
   name
   slug
-  rating
   featured: metafield(key: "featured")
   salesCount: metafield(key: "sales_count")
   thumbnail {

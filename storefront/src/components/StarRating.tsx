@@ -1,10 +1,12 @@
 import { Star } from "lucide-react";
 
-// Saleor's Product.rating is a real field, but this instance has no backing
-// review system to ever populate it (no Review type/mutation anywhere in
-// the schema — see docs/phase-1-mvp.md's rebuild notes). Rendering "No
-// ratings yet" instead of silently hiding the slot is the same honesty
-// pattern used for the empty product catalog elsewhere in this app.
+// `rating` here is a real average computed from the reviews sidecar
+// (backend/apps/reviews) — never Saleor's own Product.rating field, which
+// has no backing review system anywhere in the schema (no Review type or
+// submission mutation) and would just be an unbacked, staff-editable
+// number. Rendering "No ratings yet" instead of silently hiding the slot
+// is the same honesty pattern used for the empty product catalog
+// elsewhere in this app.
 export function StarRating({
   rating,
   reviewCount,

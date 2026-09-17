@@ -2,6 +2,7 @@ import { saleorClient } from "@/lib/saleor-client";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
 import { ProductListDocument } from "@/gql/generated/graphql";
 import { ProductCard } from "@/components/ProductCard";
+import { getReviewSummaries } from "@/lib/reviews";
 
 // Real same-category query — Saleor has no native "related products" field
 // (confirmed via schema introspection), so this is a genuine, if simple,
@@ -28,6 +29,7 @@ export async function RelatedProducts({
   const related = (result.data?.products?.edges.map((e) => e.node) ?? [])
     .filter((p) => p.id !== excludeProductId)
     .slice(0, 8);
+  const reviewSummaries = await getReviewSummaries(related.map((p) => p.id));
 
   return (
     <section>
@@ -38,7 +40,7 @@ export async function RelatedProducts({
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {related.map((product) => (
             <li key={product.id}>
-              <ProductCard product={product} />
+              <ProductCard product={product} reviewSummary={reviewSummaries[product.id]} />
             </li>
           ))}
         </ul>
