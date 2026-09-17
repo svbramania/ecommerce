@@ -9,6 +9,7 @@ backend/payment.env
 backend/tax.env
 backend/shipping.env
 backend/paypal.env
+backend/newsletter.env
 
 # Node / Next.js
 node_modules/

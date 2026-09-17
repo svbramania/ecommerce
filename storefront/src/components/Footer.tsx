@@ -3,6 +3,7 @@ import { saleorClient } from "@/lib/saleor-client";
 import { getCustomerToken } from "@/lib/auth";
 import { ShopInfoDocument, ProductCategoriesDocument } from "@/gql/generated/graphql";
 import { DEFAULT_CHANNEL } from "@/lib/checkout";
+import { NewsletterSignupForm } from "@/components/NewsletterSignupForm";
 
 // Matches Amazon's real footer column structure ("Let Us Help You", "Get
 // to Know Us") where this app has real functionality behind the link —
@@ -40,6 +41,20 @@ export async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-border bg-header-bg text-header-fg">
+      <div className="border-b border-white/10 px-4 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Get {shopName} news and deals</h2>
+            <p className="mt-1 text-sm text-header-fg/70">
+              New arrivals and real sales, sent occasionally — no spam.
+            </p>
+          </div>
+          <div className="sm:w-80">
+            <NewsletterSignupForm />
+          </div>
+        </div>
+      </div>
+
       {/* divide-x only kicks in at sm+, once the grid is a single row of
           three (grid-cols-2 on mobile wraps the third item to its own row,
           where a left border would cut across it rather than sit between
