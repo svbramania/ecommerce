@@ -39,7 +39,7 @@ export function PromoCodeForm({
 
   return (
     <form
-      className="flex gap-2"
+      className="flex flex-col gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
@@ -49,19 +49,20 @@ export function PromoCodeForm({
         });
       }}
     >
-      <label htmlFor="promo-code" className="sr-only">
-        Discount code
-      </label>
-      <Input
-        id="promo-code"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        placeholder="Discount code"
-        className="flex-1"
-      />
-      <Button type="submit" variant="primary" disabled={isPending || !code}>
-        Apply
-      </Button>
+      <div className="flex items-end gap-2">
+        <div className="flex flex-1 flex-col gap-1">
+          {/* Visible, not sr-only — same reasoning as CheckoutForm's
+              email field: a placeholder alone disappears once you type,
+              leaving nothing to confirm what the field was. */}
+          <label htmlFor="promo-code" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            Discount code
+          </label>
+          <Input id="promo-code" value={code} onChange={(e) => setCode(e.target.value)} />
+        </div>
+        <Button type="submit" variant="primary" disabled={isPending || !code}>
+          Apply
+        </Button>
+      </div>
       {message && (
         <p role="status" className="text-xs text-zinc-500">
           {message}

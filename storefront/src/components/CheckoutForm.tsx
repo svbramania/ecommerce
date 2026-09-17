@@ -32,18 +32,22 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
     <div className="flex flex-col gap-8 rounded-lg border border-border bg-surface p-6">
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Contact</h2>
-        <div className="flex gap-2">
-          <label htmlFor="checkout-email" className="sr-only">
-            Email
-          </label>
-          <Input
-            id="checkout-email"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1"
-          />
+        <div className="flex items-end gap-2">
+          <div className="flex flex-1 flex-col gap-1">
+            {/* Visible, not sr-only — a placeholder alone disappears the
+                moment you start typing, leaving no persistent confirmation
+                of what a field is once it's filled in. Found while
+                auditing checkout's real keyboard/label behavior. */}
+            <label htmlFor="checkout-email" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+              Email
+            </label>
+            <Input
+              id="checkout-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
           <Button type="button" variant="primary" disabled={isPending} onClick={() => run(() => updateEmail(email))}>
             Save
           </Button>
@@ -67,12 +71,14 @@ export function CheckoutForm({ checkout }: { checkout: CheckoutFieldsFragment })
             ] as const
           ).map(([key, label]) => (
             <div key={key} className="flex flex-col gap-1">
-              <label htmlFor={`address-${key}`} className="sr-only">
+              <label
+                htmlFor={`address-${key}`}
+                className="text-xs font-medium text-zinc-600 dark:text-zinc-400"
+              >
                 {label}
               </label>
               <Input
                 id={`address-${key}`}
-                placeholder={label}
                 value={address[key]}
                 onChange={(e) => setAddress((a) => ({ ...a, [key]: e.target.value }))}
               />
